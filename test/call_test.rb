@@ -209,8 +209,6 @@ class CallTest < Minitest::Test
 
     end
 
-    # TODO
-
     # endregion #terminate_call method
 
     # region #get_details method
