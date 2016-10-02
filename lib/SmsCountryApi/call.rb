@@ -1,0 +1,416 @@
+#-----
+#
+# SmsCountryApi
+# Copyright (C) 2016 Todd Knarr
+#
+#-----
+
+require 'rest-client'
+
+module SmsCountryApi
+
+    # Access to the `Calls` interface. Used to initiate and terminate calls, and to check on
+    # call status.
+    class Call
+
+        # URL path component for calls.
+        CALL_PATH      = "Calls"
+
+        # URL path component for bulk calls.
+        BULK_CALL_PATH = "BulkCalls"
+
+        # Details of a call.
+        class CallDetails
+
+            # @!attribute [rw] number
+            #   @return [String] Number dialed.
+            attr_accessor :number
+
+            # @!attribute [rw] call_uuid
+            #   @return [String] Alphanumeric UUID of the call.
+            attr_accessor :call_uuid
+
+            # @!attribute [rw] caller_id
+            #   @return [String] Caller ID displayed to the called party.
+            attr_accessor :caller_id
+
+            # @!attribute [rw] status
+            #   @return [String] Call status.
+            attr_accessor :status
+
+            # @!attribute [rw] ring_time
+            #   @return [Time] Time at which the call began ringing. May be nil if the call was
+            #                  never connected and never started ringing.
+            attr_accessor :ring_time
+
+            # @!attribute [rw] answer_time
+            #   @return [Time] Time at which the call was answered. May be nill if the call was
+            #                  never answered.
+            attr_accessor :answer_time
+
+            # @!attribute [rw] end_time
+            #   @return [Time] Time at which the call was terminated or disconnected. May be nil if
+            #                  the call was never connected.
+            attr_accessor :end_time
+
+            # @!attribute [rw] end_reason
+            #   @return [String] Reason for call termination.
+            attr_accessor :end_reason
+
+            # @!attribute [rw] cost
+            #   @return [String] Cost of the call.
+            attr_accessor :cost
+
+            # @!attribute [rw] direction
+            #   @return [String] Direction of the call, inbound or outbound.
+            attr_accessor :direction
+
+            # @!attribute [rw] pulse
+            #   @return [Integer] Number of seconds per pulse.
+            attr_accessor :pulse
+
+            # @!attribute [rw] pulses
+            #   @return [Integer] Number of pulses in the call.
+            attr_accessor :pulses
+
+            # @!attribute [rw] cost_per_pulse
+            #   @return [Float] Cost per pulse of the call.
+            attr_accessor :cost_per_pulse
+
+            # Construct a new blank call details object.
+            #
+            def initialize
+                @number         = ''
+                @call_uuid      = ''
+                @caller_id      = ''
+                @status         = ''
+                @ring_time      = nil
+                @answer_time    = nil
+                @end_time       = nil
+                @end_reason     = ''
+                @cost           = ''
+                @direction      = ''
+                @pulse          = 0
+                @pulses         = 0
+                @cost_per_pulse = 0.0
+            end
+
+            # Construct a new call details object from a hash returned by the API.
+            #
+            # @param [Hash] hash Hash from the response.
+            #
+            # @return [{CallDetails}] New call details object.
+            #
+            def self.from_hash(hash)
+                obj = CallDetails.new
+                hash.each do |k, v|
+                    case k
+                    when 'Number' then
+                        obj.number = CGI.unescape(v) unless v.nil? || v.empty?
+                    when 'CallUUID' then
+                        obj.call_uuid = CGI.unescape(v) unless v.nil? || v.empty?
+                    when 'CallerId' then
+                        obj.caller_id = CGI.unescape(v) unless v.nil? || v.empty?
+                    when 'Status' then
+                        obj.status = CGI.unescape(v) unless v.nil? || v.empty?
+                    when 'RingTime' then
+                        obj.ring_time = Time.at(CGI.unescape(v).to_i) unless v.nil? || v.empty?
+                    when 'AnswerTime' then
+                        obj.answer_time = Time.at(CGI.unescape(v).to_i) unless v.nil? || v.empty?
+                    when 'EndTime' then
+                        obj.end_time = Time.at(CGI.unescape(v).to_i) unless v.nil? || v.empty?
+                    when 'EndReason' then
+                        obj.end_reason = CGI.unescape(v) unless v.nil? || v.empty?
+                    when 'Cost' then
+                        obj.cost = CGI.unescape(v) unless v.nil? || v.empty?
+                    when 'Direction' then
+                        obj.direction = CGI.unescape(v) unless v.nil? || v.empty?
+                    when 'Pulse' then
+                        obj.pulse = CGI.unescape(v).to_i unless v.nil? || v.empty?
+                    when 'Pulses' then
+                        obj.pulses = CGI.unescape(v).to_i unless v.nil? || v.empty?
+                    when 'CostPerPulse' then
+                        obj.cost_per_pulse = CGI.unescape(v).to_f unless v.nil? || v.empty?
+                    end
+                end
+                obj
+            end
+
+        end
+
+        # Construct a Call object to make calls using a specific endpoint.
+        #
+        # @param [{Endpoint}] endpoint (required) Endpoint object to use for service URL and authentication parameters.
+        #
+        # @raise [ArgumentError] Endpoint is not valid.
+        #
+        def initialize(endpoint)
+            if endpoint.nil? || !endpoint.kind_of?(Endpoint)
+                raise ArgumentError, "A valid endpoint must be supplied."
+            end
+
+            @endpoint = endpoint
+        end
+
+        # Create and initiate a new call to a single number.
+        #
+        # @param [String] number (required) number to call.
+        # @param [String] caller_id Caller ID number to display to the called party.
+        # @param [String] ring_url URL to be notified as soon as the call begins ringing.
+        # @param [String] answer_url URL to be notified as soon as the call is answered.
+        # @param [String] hangup_url URL to be notified as soon as the called party hangs up or is disconnected. If
+        #                            not provided, `answer_url` will be used.
+        # @param [String] http_method HTTP method to be used for notification requests.
+        # @param [String] xml XML specifying content to be played into the call.
+        #
+        # @return [Array({StatusResponse}, String)]
+        #   - Status of the operation.
+        #   - Alphanumeric UUID identifying the call.
+        #
+        # @raise [ArgumentError] A required argument is missing or an argument is invalid.
+        #
+        def initiate_call(number, caller_id: nil, ring_url: nil, answer_url: nil, hangup_url: nil,
+                          http_method: nil, xml: nil)
+            if number.nil? || !number.kind_of?(String) || number.empty?
+                raise ArgumentError, "Number must be supplied."
+            end
+
+            url     = @endpoint.url + CALL_PATH + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            values               = { 'Number' => number }
+            values['CallerId']   = caller_id unless caller_id.nil?
+            values['RingUrl']    = ring_url unless ring_url.nil?
+            values['AnswerUrl']  = answer_url unless answer_url.nil?
+            values['HangupUrl']  = hangup_url unless hangup_url.nil?
+            values['HttpMethod'] = http_method unless http_method.nil?
+            values['Xml']        = xml unless xml.nil?
+
+            call_uuid = nil
+            begin
+                response = RestClient.post url, values, headers
+                if !response.nil?
+                    status, result = StatusResponse.from_response(response)
+                    call_uuid      = result['CallUUID']
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, call_uuid
+        end
+
+        # Create and initiate a new call to a list of numbers. If only one number is
+        # provided, it will be processed as a normal {#initiate_call} operation.
+        #
+        # @param [Array<String>] number_list (required) List of numbers to call.
+        # @param [String] caller_id Caller ID number to display to the called party.
+        # @param [String] ring_url URL to be notified as soon as the call begins ringing.
+        # @param [String] answer_url URL to be notified as soon as the call is answered.
+        # @param [String] hangup_url URL to be notified as soon as the called party hangs up or is disconnected. If
+        #                            not provided, `answer_url` will be used.
+        # @param [String] http_method HTTP method to be used for notification requests.
+        # @param [String] xml XML specifying content to be played into the call.
+        #
+        # @return [Array({StatusResponse}, Array<String>)]
+        #   - Status of the operation.
+        #   - Array of alphanumeric UUIDs identifying the calls.
+        #
+        # @raise [ArgumentError] A required argument is missing or an argument is invalid.
+        #
+        def initiate_bulk_call(number_list, caller_id: nil, ring_url: nil, answer_url: nil, hangup_url: nil,
+                               http_method: nil, xml: nil)
+            if number_list.nil? || !number_list.kind_of?(Array) || number_list.empty?
+                raise ArgumentError, "List of numbers in an array must be supplied."
+            end
+
+            url     = @endpoint.url + BULK_CALL_PATH + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            values               = { 'Numbers' => number_list }
+            values['CallerId']   = caller_id unless caller_id.nil?
+            values['RingUrl']    = ring_url unless ring_url.nil?
+            values['AnswerUrl']  = answer_url unless answer_url.nil?
+            values['HangupUrl']  = hangup_url unless hangup_url.nil?
+            values['HttpMethod'] = http_method unless http_method.nil?
+            values['Xml']        = xml unless xml.nil?
+
+            call_uuids = nil
+            begin
+                response = RestClient.post url, values, headers
+                if !response.nil?
+                    status, result = StatusResponse.from_response(response)
+                    call_uuids      = result['CallUUIDs']
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, call_uuids
+        end
+
+        # Terminate a specific call and hang up.
+        #
+        # @param [String] call_uuid Alphanumeric UUID of the call to terminate.
+        #
+        # @return [Array({StatusResponse})]
+        #   - Status of the operation.
+        #
+        # @raise [ArgumentError] A required argument is missing or an argument is invalid.
+        #
+        def terminate_call(call_uuid)
+            if call_uuid.nil? || !call_uuid.kind_of?(String) || call_uuid.empty?
+                raise ArgumentError, "Call UUID must be a non-empty string."
+            end
+
+            url     = @endpoint.url + CALL_PATH + '/' + CGI.escape(call_uuid) + "/"
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            begin
+                response = RestClient.patch url, '', headers
+                if !response.nil?
+                    ary = StatusResponse.from_response(response)
+                    status = ary[0]
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            [ status ]
+        end
+
+        # Get details on a specific call.
+        #
+        # @param [String] call_uuid Alphanumeric UUID of the call to retrieve details of.
+        #
+        # @return [Array({StatusResponse}, {CallDetails})]
+        #   - Status of the operation.
+        #   - Call details object for the call.
+        #
+        # @raise [ArgumentError] A required argument is missing or an argument is invalid.
+        #
+        def get_details(call_uuid)
+            if call_uuid.nil? || !call_uuid.kind_of?(String) || call_uuid.empty?
+                raise ArgumentError, "Call UUID must be a non-empty string."
+            end
+
+            url     = @endpoint.url + CALL_PATH + '/' + CGI.escape(call_uuid) + "/"
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            details = nil
+            begin
+                response = RestClient.get url, headers
+                if !response.nil?
+                    status, result = StatusResponse.from_response(response)
+                    details_hash   = result['Call']
+                    if !details_hash.nil?
+                        details = CallDetails.from_hash(details_hash)
+                    else
+                        status = StatusResponse.new(false, "No details included in response.")
+                    end
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, details
+        end
+
+        # Retrieve a collection of calls, optionally filtering by time and/or caller ID.
+        # A limit may be specified to limit the returned collection to only a given number of
+        # messages, and an offset may be specified to start the returned collection to the given
+        # position in the total collection found.
+        #
+        # @param [DateTime] from Date/time of the earliest message to retrieve.
+        # @param [DateTime] to Date/time of the latest message to retrieve.
+        # @param [String] caller_id Caller ID to retrieve messages for.
+        # @param [Integer] offset Position to start returning messages from. (default: 0)
+        # @param [Integer] limit Maximum number of messages to return in one call. (default: 10)
+        #
+        # @return [Array({StatusResponse}, Array<{CallDetails}>)]
+        #   - Status of the operation.
+        #   - Array of call details objects matching the criteria.
+        #
+        # @raise [ArgumentError] A required argument is missing or an argument is invalid.
+        #
+        def get_collection(from: nil, to: nil, caller_id: nil, offset: nil, limit: nil)
+            if !from.nil? && !from.kind_of?(Time)
+                raise ArgumentError, "From argument must be a time."
+            end
+            if !to.nil? && !to.kind_of?(Time)
+                raise ArgumentError, "To argument must be a time."
+            end
+            if !caller_id.nil? && (!caller_id.kind_of?(String) || caller_id.empty?)
+                raise ArgumentError, "Caller ID argument must be a non-empty string."
+            end
+            if !offset.nil? && !offset.kind_of?(Numeric)
+                raise ArgumentError, "Offset argument must be a number."
+            end
+            if !limit.nil? && !limit.kind_of?(Numeric)
+                raise ArgumentError, "Limit argument must be a number."
+            end
+
+            url          = @endpoint.url + CALL_PATH + '/'
+            query_string = ""
+            query_string += '&FromDate=' + CGI.escape(from.strftime('%Y-%m-%d %H:%M:%S')) unless from.nil?
+            query_string += '&ToDate=' + CGI.escape(to.strftime('%Y-%m-%d %H:%M:%S')) unless to.nil?
+            query_string += '&CallerId=' + CGI.escape(caller_id) unless caller_id.nil?
+            query_string += '&Offset=' + offset.to_s unless offset.nil?
+            query_string += '&Limit=' + limit.to_s unless limit.nil?
+            unless query_string.empty?
+                query_string[0] = '?'
+                url             += query_string
+            end
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            returned_detail_list = nil
+            begin
+                response = RestClient.get url, headers
+                if !response.nil?
+                    status, result = StatusResponse.from_response(response)
+                    details_list   = result['Calls']
+                    if !details_list.nil?
+                        returned_detail_list = []
+                        details_list.each do |details_hash|
+                            details = CallDetails.from_hash(details_hash)
+                            returned_detail_list.push details
+                        end
+                    else
+                        status = StatusResponse.new(false, "No list of call details included in response.")
+                    end
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, returned_detail_list
+        end
+
+    end
+
+end

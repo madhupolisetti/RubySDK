@@ -1,0 +1,8 @@
+require 'SmsCountryApi/version'
+require 'SmsCountryApi/status_response'
+require 'SmsCountryApi/client'
+require 'SmsCountryApi/endpoint'
+require 'SmsCountryApi/sms'
+require 'SmsCountryApi/call'
+require 'SmsCountryApi/group'
+require 'SmsCountryApi/group_call'

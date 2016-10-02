@@ -1,0 +1,4 @@
+lib/*.rb
+lib/SmsCountryApi/*.rb
+-
+LICENSE.md
