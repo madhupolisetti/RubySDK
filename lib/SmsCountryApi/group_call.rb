@@ -33,13 +33,122 @@ module SmsCountryApi
         # Path component for terminating a call.
         HANGUP_PATH       = "Hangup"
 
+        # region SingleCall class
+
         # A single call for a participant.
-        # @todo Finish implementing.
         class SingleCall
 
-            # TODO
+            # @!attribute [rw] call_status
+            #   @return [String] Status of call.
+            attr_accessor :call_status
+
+            # @!attribute [rw] answer_time
+            #   @return [Time] Time the call was answered.
+            attr_accessor :answer_time
+
+            # @!attribute [rw] end_time
+            #   @return [Time] Time the call was ended.
+            attr_accessor :end_time
+
+            # @!attribute [rw] end_reason
+            #   @return [String] Reason for the call ending.
+            attr_accessor :end_reason
+
+            # @!attribute [rw] cost
+            #   @return [String] Cost of the call
+            attr_accessor :cost
+
+            # @!attribute [rw] pulse
+            #   @return [Integer] Seconds per pulse of the call.
+            attr_accessor :pulse
+
+            # @!attribute [rw] price_per_pulse
+            #   @return [Float] Price per pulse of the call
+            attr_accessor :price_per_pulse
+
+            # Construct a blank SingleCall object.
+            #
+            def initialize
+                @call_status     = nil
+                @answer_time     = nil
+                @end_time        = nil
+                @end_reason      = nil
+                @cost            = nil
+                @pulse           = nil
+                @price_per_pulse = nil
+            end
+
+            # Create a new SingleCall object from the provided arguments.
+            #
+            # @param [String] call_status Status of the call.
+            # @param [Time] answer_time Time the call was answered.
+            # @param [Time] end_time Time the call was ended.
+            # @param [String] end_reason Reason for the call ending.
+            # @param [String] cost Cost of the call.
+            # @param [Integer] pulse Seconds per pulse of the call.
+            # @param [Float] price_per_pulse Price per pulse of the call.
+            #
+            # @return [{SingleCall}] New object.
+            #
+            # @raise [ArgumentError] An argument is missing or invalid.
+            #
+            def self.create(call_status: nil, answer_time: nil, end_time: nil, end_reason: nil,
+                cost: nil, pulse: nil, price_per_pulse: nil)
+                if (!call_status.nil? && !call_status.kind_of?(String)) ||
+                    (!answer_time.nil? && !answer_time.kind_of?(Time)) ||
+                    (!end_time.nil? && !end_time.kind_of?(Time)) ||
+                    (!end_reason.nil? && !end_reason.kind_of?(String)) ||
+                    (!cost.nil? && !cost.kind_of?(String)) ||
+                    (!pulse.nil? && !pulse.kind_of?(Integer)) ||
+                    (!price_per_pulse.nil? && !price_per_pulse.kind_of?(Float))
+                    raise ArgumentError, "Invalid argument type."
+                end
+
+                obj                 = SingleCall.new
+                obj.call_status     = call_status unless call_status.nil?
+                obj.answer_time     = answer_time unless answer_time.nil?
+                obj.end_time        = end_time unless end_time.nil?
+                obj.end_reason      = end_reason unless end_reason.nil?
+                obj.cost            = cost unless cost.nil?
+                obj.pulse           = pulse unless pulse.nil?
+                obj.price_per_pulse = price_per_pulse unless price_per_pulse.nil?
+                obj
+            end
+
+            # Construct a new single-call object from a hash returned by the API.
+            #
+            # @param [Hash] hash Hash from the response.
+            #
+            # @return [{SingleCall}] New single-call object.
+            #
+            def self.from_hash(hash)
+                obj = Recording.new
+                hash.each do |k, v|
+                    case k
+                    when 'CallStatus' then
+                        obj.uuid = CGI.unescape(v) unless v.nil?
+                    when 'AnswerTime' then
+                        obj.answer_time = Time.at(CGI.unescape(v).to_i) unless v.nil?
+                    when 'EndTime' then
+                        obj.end_time = Time.at(CGI.unescape(v).to_i) unless v.nil?
+                    when 'EndReason' then
+                        obj.end_reason = CGI.unescape(v) unless v.nil?
+                    when 'Cost' then
+                        obj.cost = CGI.unescape(v) unless v.nil?
+                    when 'Pulse' then
+                        obj.pulse = CGI.unescape(v).to_i unless v.nil?
+                    when 'PricePerPulse' then
+                        obj.price_per_pulse = CGI.unescape(v).to_f unless v.nil?
+                    end
+                end
+                obj
+            end
 
         end
+
+        # endregion SingleCall class
+
+        # region Recording class
 
         # A recording of a call.
         class Recording
@@ -52,15 +161,58 @@ module SmsCountryApi
             #   @return [String] URL that the recording is available at.
             attr_accessor :url
 
+            # Construct a blank recording object.
+            #
+            def initialize
+                @uuid = nil
+                @url  = nil
+            end
+
             # Construct a recording object from a UUID and a URL.
             #
             # @param [String] uuid (required) Alphanumeric UUID of the recording.
             # @param [String] url (required) URL the recording is available at.
-            def initialize(uuid, url)
-                # TODO
+            #
+            # @return [{Recording}] New recording object.
+            #
+            # @raise [ArgumentError] An argument is missing or invalid.
+            #
+            def self.create(uuid, url)
+                if (uuid.nil? || !uuid.kind_of?(String) || uuid.empty?) ||
+                    (url.nil? || !url.kind_of?(String) || url.empty?)
+                    raise ArgumentError, "UUID and URL must be non-empty strings."
+                end
+
+                obj      = Recording.new
+                obj.uuid = uuid
+                obj.url  = url
+                obj
+            end
+
+            # Construct a new Recording object from a hash returned by the API.
+            #
+            # @param [Hash] hash Hash from the response.
+            #
+            # @return [{Recording}] New recording object.
+            #
+            def self.from_hash(hash)
+                obj = Recording.new
+                hash.each do |k, v|
+                    case k
+                    when 'RecordingUUID' then
+                        obj.uuid = CGI.unescape(v) unless v.nil?
+                    when 'Url' then
+                        obj.url = CGI.unescape(v) unless v.nil?
+                    end
+                end
+                obj
             end
 
         end
+
+        # endregion Recording class
+
+        # region Participants class
 
         # A participant in a call.
         class Participant
@@ -81,6 +233,15 @@ module SmsCountryApi
             #   @return [Array<SingleCall>] List of calls for this participant.
             attr_accessor :calls
 
+            # Construct a new blank object.
+            #
+            def initialize
+                @id     = 0
+                @name   = nil
+                @number = nil
+                @calls  = nil
+            end
+
             # Construct a participant object from a name and number.
             #
             # @param [String] number (required) Number of participant.
@@ -88,18 +249,57 @@ module SmsCountryApi
             # @param [Integer] id Numeric ID of participant.
             # @param [Array<SingleCall>] calls List of calls for this participant.
             #
+            # @return [{Participant}] New participant object.
+            #
             # @raise [ArgumentError] A required argument is missing or an argument is invalid.
             #
-            def initialize(number, name: nil, id: 0, calls: nil)
-                # TODO validate
+            def self.create(number, name: nil, id: 0, calls: nil)
+                if number.nil? || !number.kind_of?(String) || number.empty?
+                    raise ArgumentError, "Number must be a non-empty string."
+                end
 
-                @number = number
-                @name   = name
-                @id     = id
-                @calls  = calls
+                obj        = Participant.new
+                obj.number = number
+                obj.name   = name
+                obj.id     = id
+                obj.calls  = calls
+                obj
+            end
+
+            # Construct a new Participant object from a hash returned by the API.
+            #
+            # @param [Hash] hash Hash from the response.
+            #
+            # @return [{Participant}] New participant object.
+            #
+            def self.from_hash(hash)
+                obj = CallDetails.new
+                hash.each do |k, v|
+                    case k
+                    when 'Number' then
+                        obj.number = CGI.unescape(v) unless v.nil?
+                    when 'Name' then
+                        obj.name = CGI.unescape(v) unless v.nil?
+                    when 'Id' then
+                        obj.id = v unless v.nil?
+                    when 'Calls' then
+                        call_list = []
+                        v.each do |p|
+                            call_list.push(SingleCall.from_hash(p))
+                        end
+                        unless call_list.empty?
+                            obj.participants = call_list
+                        end
+                    end
+                end
+                obj
             end
 
         end
+
+        # endregion Participant class
+
+        # region Call class
 
         # A group call.
         class Call
@@ -112,18 +312,66 @@ module SmsCountryApi
             #   @return [Array<Participant>] List of participants in the call.
             attr_accessor :participants
 
+            # Construct a new blank object.
+            #
+            def initialize
+                @uuid         = nil
+                @participants = nil
+            end
+
             # Construct an object describing a specific group call.
             #
             # @param [String] uuid (required) Alphanumeric UUID of this call.
             # @param [Array<Participant>] participants List of participants in the call.
             #
+            # @return [{Call}] New Call object.
+            #
             # @raise [ArgumentError] A required argument is missing or an argument is invalid.
             #
-            def initialize(uuid, participants: nil)
-                # TODO
+            def self.create(uuid, participants: nil)
+                if uuid.nil? || !uuid.kind_of?(String) || uuid.empty?
+                    raise ArgumentError, "UUID must be a non-empty string."
+                end
+                if !participants.nil? && !participants.kind_of?(Array)
+                    raise ArgumentError, "Participants argument must be an array."
+                end
+
+                obj              = Call.new
+                obj.uuid         = uuid
+                obj.participants = participants
+                obj
+            end
+
+            # Construct a new group call detail object from a hash returned by the API.
+            #
+            # @param [Hash] hash Hash from the response.
+            #
+            # @return [{Call}] New group call object.
+            #
+            def self.from_hash(hash)
+                obj = CallDetails.new
+                hash.each do |k, v|
+                    case k
+                    when 'GroupCallUUID' then
+                        obj.call_uuid = CGI.unescape(v) unless v.nil?
+                    when 'Participants' then
+                        unless v.nil?
+                            participant_list = []
+                            v.each do |p|
+                                participant_list.push(Participant.from_hash(p))
+                            end
+                            unless participant_list.empty?
+                                obj.participants = participant_list
+                            end
+                        end
+                    end
+                end
+                obj
             end
 
         end
+
+        # endregion Call class
 
         # Construct a GroupCall object to make group calls using a specific endpoint.
         #

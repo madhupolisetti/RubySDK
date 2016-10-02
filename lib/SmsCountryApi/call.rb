@@ -19,6 +19,8 @@ module SmsCountryApi
         # URL path component for bulk calls.
         BULK_CALL_PATH = "BulkCalls"
 
+        # region CallDetails class
+
         # Details of a call.
         class CallDetails
 
@@ -95,6 +97,66 @@ module SmsCountryApi
                 @cost_per_pulse = 0.0
             end
 
+            # Construct a new call details object from the provided arguments
+            #
+            # @param [String] number Number of participant.
+            # @param [String] call_uuid Alphanumeric UUID of the call.
+            # @param [String] caller_id Caller ID information.
+            # @param [String] status Status of call.
+            # @param [Time] ring_time Time the call began ringing.
+            # @param [Time] answer_time Time the call was answered.
+            # @param [Time] end_time Time the call ended.
+            # @param [String] end_reason Reason the call ended.
+            # @param [String] cost Cost of the call.
+            # @param [String] direction Direction of the call.
+            # @param [Integer] pulse Number of seconds per pulse.
+            # @param [Integer] pulses Number of pulses in the call.
+            # @param [Float] cost_per_pulse Cost per pulse of the call.
+            #
+            # @return [{CallDetails}] New call details object.
+            #
+            # @raise [ArgumentError] An argument is missing or invalid.
+            #
+            def self.create(number, call_uuid, caller_id: nil, status: nil, ring_time: nil, answer_time: nil,
+                end_time: nil, end_reason: nil, cost: nil, direction: nil, pulse: nil, pulses: nil,
+                cost_per_pulse: nil)
+                if number.nil? || !number.kind_of?(String) || number.empty?
+                    raise ArgumentError, "Number must be a non-empty string."
+                end
+                if call_uuid.nil? || !call_uuid.kind_of?(String) || call_uuid.empty?
+                    raise ArgumentError, "Call UUID must be a non-empty string."
+                end
+                if (!caller_id.nil? && !caller_id.kind_of?(String)) ||
+                    (!status.nil? && !status.kind_of?(String)) ||
+                    (!ring_time.nil? && !ring_time.kind_of?(Time)) ||
+                    (!answer_time.nil? && !answer_time.kind_of?(Time)) ||
+                    (!end_time.nil? && !end_time.kind_of?(Time)) ||
+                    (!end_reason.nil? && !end_reason.kind_of?(String)) ||
+                    (!cost.nil? && !cost.kind_of?(String)) ||
+                    (!direction.nil? && !direction.kind_of?(String)) ||
+                    (!pulse.nil? && !pulse.kind_of?(Integer)) ||
+                    (!pulses.nil? && !pulses.kind_of?(Integer)) ||
+                    (!cost_per_pulse.nil? && !cost_per_pulse.kind_of?(Float))
+                    raise ArgumentError, "Invalid argument type."
+                end
+
+                obj                = CallDetails.new
+                obj.number         = number
+                obj.call_uuid      = call_uuid
+                obj.caller_id      = caller_id
+                obj.status         = status
+                obj.ring_time      = ring_time
+                obj.answer_time    = answer_time
+                obj.end_time       = end_time
+                obj.end_reason     = end_reason
+                obj.cost           = cost
+                obj.direction      = direction
+                obj.pulse          = pulse
+                obj.pulses         = pulses
+                obj.cost_per_pulse = cost_per_pulse
+                obj
+            end
+
             # Construct a new call details object from a hash returned by the API.
             #
             # @param [Hash] hash Hash from the response.
@@ -106,37 +168,39 @@ module SmsCountryApi
                 hash.each do |k, v|
                     case k
                     when 'Number' then
-                        obj.number = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.number = CGI.unescape(v) unless v.nil?
                     when 'CallUUID' then
-                        obj.call_uuid = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.call_uuid = CGI.unescape(v) unless v.nil?
                     when 'CallerId' then
-                        obj.caller_id = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.caller_id = CGI.unescape(v) unless v.nil?
                     when 'Status' then
-                        obj.status = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.status = CGI.unescape(v) unless v.nil?
                     when 'RingTime' then
-                        obj.ring_time = Time.at(CGI.unescape(v).to_i) unless v.nil? || v.empty?
+                        obj.ring_time = Time.at(CGI.unescape(v).to_i) unless v.nil?
                     when 'AnswerTime' then
-                        obj.answer_time = Time.at(CGI.unescape(v).to_i) unless v.nil? || v.empty?
+                        obj.answer_time = Time.at(CGI.unescape(v).to_i) unless v.nil?
                     when 'EndTime' then
-                        obj.end_time = Time.at(CGI.unescape(v).to_i) unless v.nil? || v.empty?
+                        obj.end_time = Time.at(CGI.unescape(v).to_i) unless v.nil?
                     when 'EndReason' then
-                        obj.end_reason = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.end_reason = CGI.unescape(v) unless v.nil?
                     when 'Cost' then
-                        obj.cost = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.cost = CGI.unescape(v) unless v.nil?
                     when 'Direction' then
-                        obj.direction = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.direction = CGI.unescape(v) unless v.nil?
                     when 'Pulse' then
-                        obj.pulse = CGI.unescape(v).to_i unless v.nil? || v.empty?
+                        obj.pulse = CGI.unescape(v).to_i unless v.nil?
                     when 'Pulses' then
-                        obj.pulses = CGI.unescape(v).to_i unless v.nil? || v.empty?
+                        obj.pulses = CGI.unescape(v).to_i unless v.nil?
                     when 'CostPerPulse' then
-                        obj.cost_per_pulse = CGI.unescape(v).to_f unless v.nil? || v.empty?
+                        obj.cost_per_pulse = CGI.unescape(v).to_f unless v.nil?
                     end
                 end
                 obj
             end
 
         end
+
+        # endregion CallDetails class
 
         # Construct a Call object to make calls using a specific endpoint.
         #
@@ -249,7 +313,7 @@ module SmsCountryApi
                 response = RestClient.post url, values, headers
                 if !response.nil?
                     status, result = StatusResponse.from_response(response)
-                    call_uuids      = result['CallUUIDs']
+                    call_uuids     = result['CallUUIDs']
                 else
                     status = StatusResponse.new(false, "No response received.")
                 end
@@ -283,7 +347,7 @@ module SmsCountryApi
             begin
                 response = RestClient.patch url, '', headers
                 if !response.nil?
-                    ary = StatusResponse.from_response(response)
+                    ary    = StatusResponse.from_response(response)
                     status = ary[0]
                 else
                     status = StatusResponse.new(false, "No response received.")
@@ -291,7 +355,7 @@ module SmsCountryApi
             rescue StandardError => e
                 status = StatusResponse.new(false, e.to_s)
             end
-            [ status ]
+            [status]
         end
 
         # Get details on a specific call.

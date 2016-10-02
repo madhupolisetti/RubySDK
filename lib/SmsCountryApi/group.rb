@@ -18,6 +18,8 @@ module SmsCountryApi
         # Path component for group members.
         MEMBER_PATH = "Members"
 
+        # region Member class
+
         # Member of a group.
         class Member
 
@@ -33,22 +35,66 @@ module SmsCountryApi
             #   @return [String] Number of group member.
             attr_accessor :number
 
+            # Construct a blank member object
+            #
+            def initialize
+                @id     = 0
+                @name   = nil
+                @number = nil
+            end
+
             # Construct a member object from a name and number.
             #
             # @param [String] number (required) Number of group member.
             # @param [String] name Name of group member.
             # @param [Integer] id Numeric ID of group member.
             #
+            # @return [{Member}] New member object.
+            #
             # @raise [ArgumentError] A required argument is missing or an argument is invalid.
             #
-            def initialize(number, name: nil, id: 0)
-                # TODO validate
+            def self.create(number, name: nil, id: 0)
+                if number.nil? || !number.kind_of?(String) || number.empty?
+                    raise ArgumentError, "Number must be a non-empty string."
+                end
+                if (!name.nil? && !name.kind_of?(String)) ||
+                    (!id.nil? && !id.kind_of?(Integer))
+                    raise ArgumentError, "Invalid argument type."
+                end
 
-                @number = number
-                @name   = name
-                @id     = id
+                obj        = Member.new
+                obj.number = number
+                obj.name   = name
+                obj.id     = id
+                obj
             end
+
+            # Construct a member object from a hash returned by the API.
+            #
+            # @param [Hash] hash Hash from the response.
+            #
+            # @return [{Member}] New member object.
+            #
+            def self.from_hash(hash)
+                obj = Member.new
+                hash.each do |k, v|
+                    case k
+                    when 'Number' then
+                        obj.number = CGI.unescape(v) unless v.nil?
+                    when 'Name' then
+                        obj.name = CGI.unescape(v) unless v.nil?
+                    when 'Id' then
+                        obj.id = CGI.unescape(v).to_i unless v.nil?
+                    end
+                end
+                obj
+            end
+
         end
+
+        # endregion Member class
+
+        # region GroupDetail class
 
         # Representation of a group.
         class GroupDetail
@@ -77,6 +123,17 @@ module SmsCountryApi
             #   @return [Array<Member>] Array of members of the group. May be empty.
             attr_accessor :members
 
+            # Construct a blank object.
+            #
+            def initialize
+                @id                  = 0
+                @name                = nil
+                @tiny_name           = nil
+                @start_call_on_enter = nil
+                @end_call_on_exit    = nil
+                @members             = nil
+            end
+
             # Construct a GroupDetail object from detail information.
             #
             # @param [String] name (required) Name of group.
@@ -88,20 +145,70 @@ module SmsCountryApi
             # @param [Array<Member>] members List of members of the group.
             # @param [Integer] id Numeric ID of the group.
             #
+            # @return [{GroupDetail}] New group detail object.
+            #
             # @raise [ArgumentError] A required argument is missing or an argument is invalid.
             #
-            def initialize(name, tiny_name: nil, start_call_on_enter: nil, end_call_on_exit: nil, members: nil, id: 0)
-                # TODO validate
+            def self.create(name, tiny_name: nil, start_call_on_enter: nil, end_call_on_exit: nil, members: nil, id: 0)
+                if name.nil? || !name.kind_of?(String) || name.empty?
+                    raise ArgumentError, "Name must be a non-empty string."
+                end
+                if (!tiny_name.nil? && !tiny_name.kind_of?(String)) ||
+                    (!start_call_on_enter.nil? && !start_call_on_enter.kind_of?(String)) ||
+                    (!end_call_on_exit.nil? && !end_call_on_exit.kind_of?(String)) ||
+                    (!members.nil? && !members.kind_of?(Array)) ||
+                    (!id.nil? && !id.kind_of?(Integer))
+                    raise ArgumentError, "Invalid argument type."
+                end
 
-                @name                = name
-                @tiny_name           = tiny_name
-                @start_call_on_enter = start_call_on_enter
-                @end_call_on_exit    = end_call_on_exit
-                @members             = members || []
-                @id                  = id
+                obj                     = GroupDetail.new
+                obj.name                = name
+                obj.tiny_name           = tiny_name
+                obj.start_call_on_enter = start_call_on_enter
+                obj.end_call_on_exit    = end_call_on_exit
+                obj.members             = members
+                obj.id                  = id
+                obj
+            end
+
+            # Construct a new group detail object from a hash returned by the API.
+            #
+            # @param [Hash] hash Hash from the response.
+            #
+            # @return [{GroupDetail}] New group detail object.
+            #
+            def self.from_hash(hash)
+                obj = GroupDetail.new
+                hash.each do |k, v|
+                    case k
+                    when 'Name' then
+                        obj.name = CGI.unescape(v) unless v.nil?
+                    when 'TinyName' then
+                        obj.tiny_name = CGI.unescape(v) unless v.nil?
+                    when 'StartGroupCallOnEnter' then
+                        obj.start_call_on_enter = CGI.unescape(v) unless v.nil?
+                    when 'EndGroupCallOnExit' then
+                        obj.end_call_on_exit = CGI.unescape(v) unless v.nil?
+                    when 'Id' then
+                        obj.id = CGI.unescape(v).to_i unless v.nil?
+                    when 'Members' then
+                        unless v.nil?
+                            member_list = []
+                            v.each do |m|
+                                member_list.push(Member.from_hash(m))
+                            end
+                            unless member_list.empty?
+                                obj.members = member_list
+                            end
+                        end
+                    end
+                end
+                obj
             end
 
         end
+
+        # endregion GroupDetail class
 
         # Construct a Group object to make calls using a specific endpoint.
         #

@@ -29,6 +29,12 @@ class SMSTest < Minitest::Test
 
     end
 
+    # region SmsDetails class
+
+    # TODO test SmsDetails class
+
+    # endregion SmsDetails Class
+
     # region #send method
 
     def test_send_basic_success

@@ -18,6 +18,8 @@ module SmsCountryApi
         # URL path component for bulk SMS access.
         BULK_SMS_PATH = 'BulkSMSes'
 
+        # region SmsDetails class
+
         # Details of a single SMS message.
         class SmsDetails
 
@@ -67,6 +69,52 @@ module SmsCountryApi
                 @cost         = ''
             end
 
+            # Construct a new SMS details object from the provided arguments.
+            #
+            # @param [String] message_uuid Alphanumeric UUID of the message.
+            # @param [String] number Number the message was sent to.
+            # @param [String] tool Tool used to send the message.
+            # @param [String] sender_id Sender ID information displayed to recipient.
+            # @param [String] text Message text.
+            # @param [String] status Delivery status of the message.
+            # @param [Time] status_time Last time the status was updated.
+            # @param [String] cost Amount that the message cost.
+            #
+            # @return [{SmsDetails}] New object.
+            #
+            # @raise [ArgumentError] An argument is missing or invalid.
+            #
+            def self.create(message_uuid, number, text, tool: nil, sender_id: nil, status: nil,
+                status_time: nil, cost: nil)
+                if message_uuid.nil? || !message_uuid.kind_of?(String) || message_uuid.empty?
+                    raise ArgumentError, "Message UUID must be a non-empty string."
+                end
+                if number.nil? || !number.kind_of?(String) || number.empty?
+                    raise ArgumentError, "Number must be a non-empty string."
+                end
+                if text.nil? || !text.kind_of?(String) || text.empty?
+                    raise ArgumentError, "Message text must be a non-empty string."
+                end
+                if (!tool.nil? && !tool.kind_of?(String)) ||
+                    (!sender_id.nil? && !sender_id.kind_of?(String)) ||
+                    (!status.nil? && !status.kind_of?(String)) ||
+                    (!status_time.nil? && !status_time.kind_of?(Time)) ||
+                    (!cost.nil? && !cost.kind_of?(String))
+                    raise ArgumentError, "Invalid argument type."
+                end
+
+                obj              = SmsDetails.new
+                obj.message_uuid = message_uuid
+                obj.number       = number
+                obj.tool         = tool
+                obj.sender_id    = sender_id
+                obj.text         = text
+                obj.status       = status
+                obj.status_time  = status_time
+                obj.cost         = cost
+                obj
+            end
+
             # Construct a new SMS details object from a hash returned by the API.
             #
             # @param [Hash] hash Hash from the response.
@@ -78,27 +126,29 @@ module SmsCountryApi
                 hash.each do |k, v|
                     case k
                     when 'MessageUUID' then
-                        obj.message_uuid = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.message_uuid = CGI.unescape(v) unless v.nil?
                     when 'Number' then
-                        obj.number = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.number = CGI.unescape(v) unless v.nil?
                     when 'Tool' then
-                        obj.tool = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.tool = CGI.unescape(v) unless v.nil?
                     when 'SenderId' then
-                        obj.sender_id = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.sender_id = CGI.unescape(v) unless v.nil?
                     when 'Text' then
-                        obj.text = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.text = CGI.unescape(v) unless v.nil?
                     when 'Status' then
-                        obj.status = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.status = CGI.unescape(v) unless v.nil?
                     when 'StatusTime' then
-                        obj.status_time = Time.at(CGI.unescape(v).to_i) unless v.nil? || v.empty?
+                        obj.status_time = Time.at(CGI.unescape(v).to_i) unless v.nil?
                     when 'Cost' then
-                        obj.cost = CGI.unescape(v) unless v.nil? || v.empty?
+                        obj.cost = CGI.unescape(v) unless v.nil?
                     end
                 end
                 obj
             end
 
         end
+
+        # endregion SmsDetails class
 
         # Construct an SMS object to send messages using a specific endpoint.
         #

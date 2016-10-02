@@ -29,6 +29,12 @@ class CallTest < Minitest::Test
 
     end
 
+    # region CallDetails class
+
+    # TODO test CallDetails class
+
+    # endregion CallDetails class
+
     # region #initiate_call method
 
     def test_initiate_call_basic_success
