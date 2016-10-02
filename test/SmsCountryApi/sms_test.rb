@@ -5,11 +5,197 @@
 #
 #-----
 
-require './test_helper'
+require File.expand_path("../../test_helper", __FILE__)
 require 'json'
 require 'webmock/minitest'
 
 class SMSTest < Minitest::Test
+
+    # region SmsDetails class
+
+    def test_smsdetails_constructor_and_accessors
+
+        obj = SmsCountryApi::SMS::SmsDetails.new
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::SMS::SmsDetails, obj, "Object isn't the correct type."
+        assert_nil obj.message_uuid, "Message UUID isn't nil."
+        assert_nil obj.number, "Number isn't nil."
+        assert_nil obj.tool, "Tool name isn't nil."
+        assert_nil obj.sender_id, "Sender ID isn't nil."
+        assert_nil obj.text, "Message text isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.status_time, "Status time isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+
+    end
+
+    def test_smsdetails_create
+
+        # Required arguments only
+
+        obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message")
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::SMS::SmsDetails, obj, "Object isn't the correct type."
+        assert_equal UUID, obj.message_uuid, "Message UUID doesn't match."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal "Test message", obj.text, "Message text doesn't match."
+        assert_nil obj.tool, "Tool name isn't nil."
+        assert_nil obj.sender_id, "Sender ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.status_time, "Status time isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+
+        # Optional arguments
+
+        obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", tool: "test")
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::SMS::SmsDetails, obj, "Object isn't the correct type."
+        assert_equal UUID, obj.message_uuid, "Message UUID doesn't match."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal "Test message", obj.text, "Message text doesn't match."
+        assert_equal "test", obj.tool, "Tool name doesn't match."
+        assert_nil obj.sender_id, "Sender ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.status_time, "Status time isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+
+        obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", sender_id: "test")
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::SMS::SmsDetails, obj, "Object isn't the correct type."
+        assert_equal UUID, obj.message_uuid, "Message UUID doesn't match."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal "Test message", obj.text, "Message text doesn't match."
+        assert_nil obj.tool, "Tool name isn't nil."
+        assert_equal "test", obj.sender_id, "Sender ID doesn't match."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.status_time, "Status time isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+
+        obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", status: "test")
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::SMS::SmsDetails, obj, "Object isn't the correct type."
+        assert_equal UUID, obj.message_uuid, "Message UUID doesn't match."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal "Test message", obj.text, "Message text doesn't match."
+        assert_nil obj.tool, "Tool name isn't nil."
+        assert_nil obj.sender_id, "Sender ID isn't nil."
+        assert_equal "test", obj.status, "Status doesn't match."
+        assert_nil obj.status_time, "Status time isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+
+        t   = Time.now
+        obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", status_time: t)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::SMS::SmsDetails, obj, "Object isn't the correct type."
+        assert_equal UUID, obj.message_uuid, "Message UUID doesn't match."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal "Test message", obj.text, "Message text doesn't match."
+        assert_nil obj.tool, "Tool name isn't nil."
+        assert_nil obj.sender_id, "Sender ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_equal t, obj.status_time, "Status time doesn't match."
+        assert_nil obj.cost, "Cost isn't nil."
+
+        obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", cost: "test")
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::SMS::SmsDetails, obj, "Object isn't the correct type."
+        assert_equal UUID, obj.message_uuid, "Message UUID doesn't match."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal "Test message", obj.text, "Message text doesn't match."
+        assert_nil obj.tool, "Tool name isn't nil."
+        assert_nil obj.sender_id, "Sender ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.status_time, "Status time isn't nil."
+        assert_equal "test", obj.cost, "Cost doesn't match."
+
+    end
+
+    def test_smsdetails_create_bad_args
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(nil, PHONE_NUMBER, "Test message")
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create('', PHONE_NUMBER, "Test message")
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(754, PHONE_NUMBER, "Test message")
+        end
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, nil, "Test message")
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, '', "Test message")
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, 754, "Test message")
+        end
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, nil)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, '')
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, 754)
+        end
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", tool: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", sender_id: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", status: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", status_time: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, "Test message", cost: 754)
+        end
+
+    end
+
+    def test_smsdetails_from_hash
+
+        t = Time.now
+        hash = { 'MessageUUID' => UUID,
+                 'Number'      => PHONE_NUMBER,
+                 'Tool'        => 'api',
+                 'SenderId'    => 'SMSCountry',
+                 'Text'        => 'Text of message',
+                 'Status'      => 'received',
+                 'StatusTime'  => t.to_i.to_s,
+                 'Cost'        => "1.25 USD" }
+        obj = SmsCountryApi::SMS::SmsDetails.from_hash(hash)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::SMS::SmsDetails, obj, "Object isn't the correct type."
+        assert_equal hash['MessageUUID'], obj.message_uuid, "Message UUID doesn't match."
+        assert_equal hash['Number'], obj.number, "Number doesn't match."
+        assert_equal hash['Tool'], obj.tool, "Tool string doesn't match."
+        assert_equal hash['SenderId'], obj.sender_id, "Sender ID doesn't match."
+        assert_equal hash['Text'], obj.text, "Message text doesn't match."
+        assert_equal hash['Status'], obj.status, "Status doesn't match."
+        assert_equal hash['StatusTime'], obj.status_time.to_i.to_s, "Status time doesn't match."
+        assert_equal hash['Cost'], obj.cost, "Cost doesn't match."
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.from_hash(nil)
+        end
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::SMS::SmsDetails.from_hash('')
+        end
+
+    end
+
+    # endregion SmsDetails Class
+
+    # region SMS class
 
     def test_constructor
 
@@ -29,11 +215,6 @@ class SMSTest < Minitest::Test
 
     end
 
-    # region SmsDetails class
-
-    # TODO test SmsDetails class
-
-    # endregion SmsDetails Class
 
     # region #send method
 
@@ -513,5 +694,7 @@ class SMSTest < Minitest::Test
     end
 
     # endregion #get_collection method
+
+    # endregion SMS class
 
 end

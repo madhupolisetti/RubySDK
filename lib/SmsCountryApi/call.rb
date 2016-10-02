@@ -75,26 +75,26 @@ module SmsCountryApi
             #   @return [Integer] Number of pulses in the call.
             attr_accessor :pulses
 
-            # @!attribute [rw] cost_per_pulse
-            #   @return [Float] Cost per pulse of the call.
-            attr_accessor :cost_per_pulse
+            # @!attribute [rw] price_per_pulse
+            #   @return [Float] Price per pulse of the call.
+            attr_accessor :price_per_pulse
 
             # Construct a new blank call details object.
             #
             def initialize
-                @number         = ''
-                @call_uuid      = ''
-                @caller_id      = ''
-                @status         = ''
-                @ring_time      = nil
-                @answer_time    = nil
-                @end_time       = nil
-                @end_reason     = ''
-                @cost           = ''
-                @direction      = ''
-                @pulse          = 0
-                @pulses         = 0
-                @cost_per_pulse = 0.0
+                @number          = nil
+                @call_uuid       = nil
+                @caller_id       = nil
+                @status          = nil
+                @ring_time       = nil
+                @answer_time     = nil
+                @end_time        = nil
+                @end_reason      = nil
+                @cost            = nil
+                @direction       = nil
+                @pulse           = nil
+                @pulses          = nil
+                @price_per_pulse = nil
             end
 
             # Construct a new call details object from the provided arguments
@@ -111,7 +111,7 @@ module SmsCountryApi
             # @param [String] direction Direction of the call.
             # @param [Integer] pulse Number of seconds per pulse.
             # @param [Integer] pulses Number of pulses in the call.
-            # @param [Float] cost_per_pulse Cost per pulse of the call.
+            # @param [Float] price_per_pulse Price per pulse of the call.
             #
             # @return [{CallDetails}] New call details object.
             #
@@ -119,7 +119,7 @@ module SmsCountryApi
             #
             def self.create(number, call_uuid, caller_id: nil, status: nil, ring_time: nil, answer_time: nil,
                 end_time: nil, end_reason: nil, cost: nil, direction: nil, pulse: nil, pulses: nil,
-                cost_per_pulse: nil)
+                price_per_pulse: nil)
                 if number.nil? || !number.kind_of?(String) || number.empty?
                     raise ArgumentError, "Number must be a non-empty string."
                 end
@@ -136,24 +136,24 @@ module SmsCountryApi
                     (!direction.nil? && !direction.kind_of?(String)) ||
                     (!pulse.nil? && !pulse.kind_of?(Integer)) ||
                     (!pulses.nil? && !pulses.kind_of?(Integer)) ||
-                    (!cost_per_pulse.nil? && !cost_per_pulse.kind_of?(Float))
+                    (!price_per_pulse.nil? && !price_per_pulse.kind_of?(Float))
                     raise ArgumentError, "Invalid argument type."
                 end
 
-                obj                = CallDetails.new
-                obj.number         = number
-                obj.call_uuid      = call_uuid
-                obj.caller_id      = caller_id
-                obj.status         = status
-                obj.ring_time      = ring_time
-                obj.answer_time    = answer_time
-                obj.end_time       = end_time
-                obj.end_reason     = end_reason
-                obj.cost           = cost
-                obj.direction      = direction
-                obj.pulse          = pulse
-                obj.pulses         = pulses
-                obj.cost_per_pulse = cost_per_pulse
+                obj                 = CallDetails.new
+                obj.number          = number
+                obj.call_uuid       = call_uuid
+                obj.caller_id       = caller_id
+                obj.status          = status
+                obj.ring_time       = ring_time
+                obj.answer_time     = answer_time
+                obj.end_time        = end_time
+                obj.end_reason      = end_reason
+                obj.cost            = cost
+                obj.direction       = direction
+                obj.pulse           = pulse
+                obj.pulses          = pulses
+                obj.price_per_pulse = price_per_pulse
                 obj
             end
 
@@ -164,6 +164,9 @@ module SmsCountryApi
             # @return [{CallDetails}] New call details object.
             #
             def self.from_hash(hash)
+                if hash.nil? || !hash.kind_of?(Hash)
+                    raise ArgumentError, "Argument must be a hash."
+                end
                 obj = CallDetails.new
                 hash.each do |k, v|
                     case k
@@ -191,8 +194,8 @@ module SmsCountryApi
                         obj.pulse = CGI.unescape(v).to_i unless v.nil?
                     when 'Pulses' then
                         obj.pulses = CGI.unescape(v).to_i unless v.nil?
-                    when 'CostPerPulse' then
-                        obj.cost_per_pulse = CGI.unescape(v).to_f unless v.nil?
+                    when 'PricePerPulse' then
+                        obj.price_per_pulse = CGI.unescape(v).to_f unless v.nil?
                     end
                 end
                 obj

@@ -5,11 +5,353 @@
 #
 #-----
 
-require './test_helper'
+require File.expand_path("../../test_helper", __FILE__)
 require 'json'
 require 'webmock/minitest'
 
 class CallTest < Minitest::Test
+
+    # region CallDetails class
+
+    def test_calldetails_constructor_and_accessors
+
+        obj = SmsCountryApi::Call::CallDetails.new
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_nil obj.number, "Number isn't nil."
+        assert_nil obj.call_uuid, "Call UUID isn't nil."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+    end
+
+    def test_calldetails_create
+
+        # Required arguments only
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        # Optional arguments
+        t = Time.now
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, caller_id: 'test')
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_equal 'test', obj.caller_id, "Caller ID doesn't match."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, status: 'test')
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_equal 'test', obj.status, "Status doesn't match."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, ring_time: t)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_equal t, obj.ring_time, "Ring time doesn't match."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        t   = Time.now
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, answer_time: t)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_equal t, obj.answer_time, "Answer time doesn't match."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, end_time: t)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_equal t, obj.end_time, "End time doesn't match."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, end_reason: 'test')
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_equal 'test', obj.end_reason, "End reason doesn't match."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, cost: 'test')
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_equal 'test', obj.cost, "Cost doesn't match."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, direction: 'test')
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_equal 'test', obj.direction, "Direction doesn't match."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, pulse: 5)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_equal 5, obj.pulse, "Pulse doesn't match."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, pulses: 5)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_equal 5, obj.pulses, "Pulses doesn't match."
+        assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
+
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, price_per_pulse: 5.0)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
+        assert_nil obj.caller_id, "Caller ID isn't nil."
+        assert_nil obj.status, "Status isn't nil."
+        assert_nil obj.ring_time, "Ring time isn't nil."
+        assert_nil obj.answer_time, "Answer time isn't nil."
+        assert_nil obj.end_time, "End time isn't nil."
+        assert_nil obj.end_reason, "End reason isn't nil."
+        assert_nil obj.cost, "Cost isn't nil."
+        assert_nil obj.direction, "Direction isn't nil."
+        assert_nil obj.pulse, "Pulse isn't nil."
+        assert_nil obj.pulses, "Pulses isn't nil."
+        assert_equal 5.0, obj.price_per_pulse, "Price per pulse doesn't match."
+
+    end
+
+    def test_calldetails_create_bad_args
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, nil)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, '')
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, 754)
+        end
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(nil, UUID)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create('', UUID)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(754, UUID)
+        end
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, caller_id: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, status: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, ring_time: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, answer_time: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, end_time: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, end_reason: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, cost: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, direction: 754)
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, pulse: '5')
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, pulses: '5')
+        end
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID, price_per_pulse: 754)
+        end
+
+    end
+
+    def test_calldetails_from_hash
+
+        t    = Time.now
+        hash = { 'CallUUID'      => UUID,
+                 'Number'        => PHONE_NUMBER,
+                 'CallerId'      => 'SMSCountry',
+                 'Status'        => 'completed',
+                 'RingTime'      => t.to_i.to_s,
+                 'AnswerTime'    => t.to_i.to_s,
+                 'EndTime'       => t.to_i.to_s,
+                 'EndReason'     => 'NORMAL',
+                 'Cost'          => "1.25 USD",
+                 'Direction'     => 'Outbound',
+                 'Pulse'         => '30',
+                 'Pulses'        => '1',
+                 'PricePerPulse' => '0.7' }
+        obj  = SmsCountryApi::Call::CallDetails.from_hash(hash)
+        refute_nil obj, "Object wasn't created successfully."
+        assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
+        assert_equal hash['CallUUID'], obj.call_uuid, "Caller UUID doesn't match."
+        assert_equal hash['Number'], obj.number, "Number doesn't match."
+        assert_equal hash['CallerId'], obj.caller_id, "Caller ID doesn't match."
+        assert_equal hash['Status'], obj.status, "Status doesn't match."
+        assert_equal hash['RingTime'], obj.ring_time.to_i.to_s, "Ring time doesn't match."
+        assert_equal hash['AnswerTime'], obj.answer_time.to_i.to_s, "Answer time doesn't match."
+        assert_equal hash['EndTime'], obj.end_time.to_i.to_s, "End time doesn't match."
+        assert_equal hash['EndReason'], obj.end_reason, "End reason doesn't match."
+        assert_equal hash['Cost'], obj.cost, "Cost doesn't match."
+        assert_equal hash['Direction'], obj.direction, "Direction doesn't match."
+        assert_equal hash['Pulse'].to_i, obj.pulse, "Pulse doesn't match."
+        assert_equal hash['Pulses'].to_i, obj.pulses, "Pulses doesn't match."
+        assert_equal hash['PricePerPulse'].to_f, obj.price_per_pulse, "Price per pulse doesn't match."
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.from_hash(nil)
+        end
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::Call::CallDetails.from_hash('')
+        end
+
+    end
+
+    # endregion CallDetails class
+
+    # region Call class
 
     def test_constructor
 
@@ -29,11 +371,6 @@ class CallTest < Minitest::Test
 
     end
 
-    # region CallDetails class
-
-    # TODO test CallDetails class
-
-    # endregion CallDetails class
 
     # region #initiate_call method
 
@@ -571,5 +908,7 @@ class CallTest < Minitest::Test
     end
 
     # endregion #get_collection method
+
+    # endregion Call class
 
 end

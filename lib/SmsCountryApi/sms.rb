@@ -59,14 +59,14 @@ module SmsCountryApi
             # Construct a new blank SMS details object.
             #
             def initialize
-                @message_uuid = ''
-                @number       = ''
-                @tool         = ''
-                @sender_id    = ''
-                @text         = ''
-                @status       = ''
+                @message_uuid = nil
+                @number       = nil
+                @tool         = nil
+                @sender_id    = nil
+                @text         = nil
+                @status       = nil
                 @status_time  = nil
-                @cost         = ''
+                @cost         = nil
             end
 
             # Construct a new SMS details object from the provided arguments.
@@ -122,6 +122,9 @@ module SmsCountryApi
             # @return [SmsDetails] New SMS details object.
             #
             def self.from_hash(hash)
+                if hash.nil? || !hash.kind_of?(Hash)
+                    raise ArgumentError, "Argument must be a hash."
+                end
                 obj = SmsDetails.new
                 hash.each do |k, v|
                     case k

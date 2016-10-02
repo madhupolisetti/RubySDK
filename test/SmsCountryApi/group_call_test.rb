@@ -5,7 +5,7 @@
 #
 #-----
 
-require './test_helper'
+require File.expand_path("../../test_helper", __FILE__)
 require 'base64'
 
 class GroupCallTest < Minitest::Test
