@@ -162,7 +162,7 @@ class SMSTest < Minitest::Test
 
     def test_smsdetails_from_hash
 
-        t = Time.now
+        t    = Time.now
         hash = { 'MessageUUID' => UUID,
                  'Number'      => PHONE_NUMBER,
                  'Tool'        => 'api',
@@ -171,7 +171,7 @@ class SMSTest < Minitest::Test
                  'Status'      => 'received',
                  'StatusTime'  => t.to_i.to_s,
                  'Cost'        => "1.25 USD" }
-        obj = SmsCountryApi::SMS::SmsDetails.from_hash(hash)
+        obj  = SmsCountryApi::SMS::SmsDetails.from_hash(hash)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::SMS::SmsDetails, obj, "Object isn't the correct type."
         assert_equal hash['MessageUUID'], obj.message_uuid, "Message UUID doesn't match."
@@ -189,6 +189,31 @@ class SMSTest < Minitest::Test
 
         assert_raises ArgumentError do
             obj = SmsCountryApi::SMS::SmsDetails.from_hash('')
+        end
+
+    end
+
+    def test_smsdetails_to_hash
+
+        t    = Time.now
+        hash = { 'MessageUUID' => UUID,
+                 'Number'      => PHONE_NUMBER,
+                 'Tool'        => 'api',
+                 'SenderId'    => 'SMSCountry',
+                 'Text'        => 'Text of message',
+                 'Status'      => 'received',
+                 'StatusTime'  => t.to_i.to_s,
+                 'Cost'        => "1.25 USD" }
+        obj  = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, 'Text of message',
+                                                     tool:        'api',
+                                                     sender_id:   "SMSCountry",
+                                                     status:      'received',
+                                                     status_time: t,
+                                                     cost:        '1.25 USD')
+        new_hash = obj.to_hash
+        refute_nil new_hash, "New hash not created."
+        new_hash.each do |k, v|
+            assert_equal hash[k], v, "{k} item did not match."
         end
 
     end

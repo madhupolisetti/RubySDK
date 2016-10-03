@@ -349,6 +349,42 @@ class CallTest < Minitest::Test
 
     end
 
+    def test_calldetails_to_hash
+
+        t        = Time.now
+        hash     = { 'CallUUID'      => UUID,
+                     'Number'        => PHONE_NUMBER,
+                     'CallerId'      => 'SMSCountry',
+                     'Status'        => 'completed',
+                     'RingTime'      => t.to_i.to_s,
+                     'AnswerTime'    => t.to_i.to_s,
+                     'EndTime'       => t.to_i.to_s,
+                     'EndReason'     => 'NORMAL',
+                     'Cost'          => "1.25 USD",
+                     'Direction'     => 'Outbound',
+                     'Pulse'         => '30',
+                     'Pulses'        => '1',
+                     'PricePerPulse' => '0.7' }
+        obj      = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER, UUID,
+                                                           caller_id:       "SMSCountry",
+                                                           status:          'completed',
+                                                           ring_time:       t,
+                                                           answer_time:     t,
+                                                           end_time:        t,
+                                                           end_reason:      "NORMAL",
+                                                           cost:            '1.25 USD',
+                                                           direction:       "Outbound",
+                                                           pulse:           30,
+                                                           pulses:          1,
+                                                           price_per_pulse: 0.7)
+        new_hash = obj.to_hash
+        refute_nil new_hash, "New hash not created."
+        new_hash.each do |k, v|
+            assert_equal hash[k], v, "{k} item did not match."
+        end
+
+    end
+
     # endregion CallDetails class
 
     # region Call class
