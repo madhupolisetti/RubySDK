@@ -97,6 +97,28 @@ module SmsCountryApi
                 @price_per_pulse = nil
             end
 
+            # Returns a hash representing the object.
+            #
+            # @return [Hash] Resulting hash.
+            #
+            def to_hash
+                hash                  = {}
+                hash['Number']        = @number unless @number.nil?
+                hash['CallUUID']      = @call_uuid unless @call_uuid.nil?
+                hash['CallerId']      = @caller_id unless @caller_id.nil?
+                hash['Status']        = @status unless @status.nil?
+                hash['RingTime']      = @ring_time.to_i.to_s unless @ring_time.nil?
+                hash['AnswerTime']    = @answer_time.to_i.to_s unless @answer_time.nil?
+                hash['EndTime']       = @end_time.to_i.to_s unless @end_time.nil?
+                hash['EndReason']     = @end_reason unless @end_reason.nil?
+                hash['Cost']          = @cost unless @cost.nil?
+                hash['Direction']     = @direction unless @direction.nil?
+                hash['Pulse']         = @pulse.to_s unless @pulse.nil?
+                hash['Pulses']        = @pulses.to_s unless @pulses.nil?
+                hash['PricePerPulse'] = @price_per_pulse.to_s unless @price_per_pulse.nil?
+                hash
+            end
+
             # Construct a new call details object from the provided arguments
             #
             # @param [String] number Number of participant.

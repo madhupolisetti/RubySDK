@@ -69,6 +69,23 @@ module SmsCountryApi
                 @cost         = nil
             end
 
+            # Returns a hash representing the object.
+            #
+            # @return [Hash] Resulting hash.
+            #
+            def to_hash
+                hash                = {}
+                hash['MessageUUID'] = @message_uuid unless @message_uuid.nil?
+                hash['Number']      = @number unless @number.nil?
+                hash['Tool']        = @tool unless @tool.nil?
+                hash['SenderId']    = @sender_id unless @sender_id.nil?
+                hash['Text']        = @text unless @text.nil?
+                hash['Status']      = @status unless @status.nil?
+                hash['StatusTime']  = @status_time.to_i.to_s unless @status_time.nil?
+                hash['Cost']        = @cost unless @cost.nil?
+                hash
+            end
+
             # Construct a new SMS details object from the provided arguments.
             #
             # @param [String] message_uuid Alphanumeric UUID of the message.
