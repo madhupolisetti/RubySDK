@@ -506,8 +506,7 @@ class CallTest < Minitest::Test
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
-        ary    = client.call.terminate_call(UUID)
-        status = ary[0]
+        status, = client.call.terminate_call(UUID)
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
 
@@ -544,8 +543,7 @@ class CallTest < Minitest::Test
 
         stub_request(:patch, MOCK_URI)
             .to_raise(StandardError)
-        ary    = client.call.terminate_call(UUID)
-        status = ary[0]
+        status, = client.call.terminate_call(UUID)
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "Exception from WebMock", status.message, "Unexpected error message encountered."

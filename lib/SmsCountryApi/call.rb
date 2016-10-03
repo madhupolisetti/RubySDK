@@ -350,8 +350,7 @@ module SmsCountryApi
             begin
                 response = RestClient.patch url, '', headers
                 if !response.nil?
-                    ary    = StatusResponse.from_response(response)
-                    status = ary[0]
+                    status, _ = StatusResponse.from_response(response)
                 else
                     status = StatusResponse.new(false, "No response received.")
                 end
