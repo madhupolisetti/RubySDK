@@ -459,7 +459,7 @@ module SmsCountryApi
             end
 
             url          = @endpoint.url + CALL_PATH + '/'
-            query_string = ""
+            query_string = ''
             query_string += '&FromDate=' + CGI.escape(from.strftime('%Y-%m-%d %H:%M:%S')) unless from.nil?
             query_string += '&ToDate=' + CGI.escape(to.strftime('%Y-%m-%d %H:%M:%S')) unless to.nil?
             query_string += '&CallerId=' + CGI.escape(caller_id) unless caller_id.nil?

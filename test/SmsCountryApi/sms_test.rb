@@ -276,7 +276,7 @@ class SMSTest < Minitest::Test
         end
 
         assert_raises ArgumentError do
-            status, message_uuid = client.sms.send("", "Test message")
+            status, message_uuid = client.sms.send('', "Test message")
         end
 
         assert_raises ArgumentError do
@@ -288,7 +288,7 @@ class SMSTest < Minitest::Test
         end
 
         assert_raises ArgumentError do
-            status, message_uuid = client.sms.send(PHONE_NUMBER, "")
+            status, message_uuid = client.sms.send(PHONE_NUMBER, '')
         end
 
         assert_raises ArgumentError do
@@ -364,7 +364,7 @@ class SMSTest < Minitest::Test
         end
 
         assert_raises ArgumentError do
-            status, message_uuid = client.sms.bulk_send([PHONE_NUMBER], "")
+            status, message_uuid = client.sms.bulk_send([PHONE_NUMBER], '')
         end
 
         assert_raises ArgumentError do

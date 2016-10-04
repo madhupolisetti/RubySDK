@@ -27,7 +27,7 @@ class EndpointTest < Minitest::Test
             obj = SmsCountryApi::Endpoint.new(nil, "xyzzy")
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Endpoint.new("", "xyzzy")
+            obj = SmsCountryApi::Endpoint.new('', "xyzzy")
         end
         assert_raises ArgumentError do
             obj = SmsCountryApi::Endpoint.new(5, "xyzzy")
@@ -36,7 +36,7 @@ class EndpointTest < Minitest::Test
             obj = SmsCountryApi::Endpoint.new("abcdefghijkl", nil)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Endpoint.new("abcdefghijkl", "")
+            obj = SmsCountryApi::Endpoint.new("abcdefghijkl", '')
         end
         assert_raises ArgumentError do
             obj = SmsCountryApi::Endpoint.new("abcdefghijkl", 5)
@@ -45,7 +45,7 @@ class EndpointTest < Minitest::Test
             obj = SmsCountryApi::Endpoint.new(nil, nil)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Endpoint.new("", "")
+            obj = SmsCountryApi::Endpoint.new('', '')
         end
         assert_raises ArgumentError do
             obj = SmsCountryApi::Endpoint.new(5, 5)
@@ -91,7 +91,7 @@ class EndpointTest < Minitest::Test
         assert_equal "https://restapi.smscountry.com/ api/testing/endpoint  /abcdefghijkl/", obj.url,
                      "Endpoint failed leaving whitespace inside leading and trailing slashes."
 
-        obj = SmsCountryApi::Endpoint.new("abcdefghijkl", "xyzzy", path: "")
+        obj = SmsCountryApi::Endpoint.new("abcdefghijkl", "xyzzy", path: '')
         assert_equal "https://restapi.smscountry.com/abcdefghijkl/", obj.url,
                      "Endpoint is not accepting an empty path."
 

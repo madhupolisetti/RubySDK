@@ -38,9 +38,21 @@ module SmsCountryApi
             # Construct a blank member object
             #
             def initialize
-                @id     = 0
+                @id     = nil
                 @name   = nil
                 @number = nil
+            end
+
+            # Returns a hash representing the object.
+            #
+            # @return [Hash] Resulting hash.
+            #
+            def to_hash
+                hash           = {}
+                hash['Id']     = @id unless @id.nil?
+                hash['Name']   = @name unless @name.nil?
+                hash['Number'] = @number unless @number.nil?
+                hash
             end
 
             # Construct a member object from a name and number.
@@ -126,12 +138,33 @@ module SmsCountryApi
             # Construct a blank object.
             #
             def initialize
-                @id                  = 0
+                @id                  = nil
                 @name                = nil
                 @tiny_name           = nil
                 @start_call_on_enter = nil
                 @end_call_on_exit    = nil
                 @members             = nil
+            end
+
+            # Returns a hash representing the object.
+            #
+            # @return [Hash] Resulting hash.
+            #
+            def to_hash
+                hash                          = {}
+                hash['Id']                    = @id unless @id.nil?
+                hash['Name']                  = @name unless @name.nil?
+                hash['TinyName']              = @tiny_name unless @tiny_name.nil?
+                hash['StartGroupCallOnEnter'] = @start_call_on_enter unless @start_call_on_enter.nil?
+                hash['EndGroupCallOnExit']    = @end_call_on_exit unless @end_call_on_exit.nil?
+                unless @members.nil?
+                    l = []
+                    @members.each do |member|
+                        l.push(member.to_hash)
+                    end
+                    hash['Members'] = members unless members.empty?
+                end
+                hash
             end
 
             # Construct a GroupDetail object from detail information.
@@ -234,36 +267,88 @@ module SmsCountryApi
         #                                  is disconnected or hangs up.
         # @param [Array<Member>] members List of initial members of the group.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # ApiId::   API UUID as a string.
-        # Success:: `true` or `false` indicating the success or failure of the operation.
-        # Message:: Message describing the action result.
-        # Group::   {GroupDetail} object describing the newly-created group.
+        # @return [Array({StatusResponse}, {GroupDetail})]
+        #   - Status of the operation.
+        #   - {GroupDetail} object describing the newly-created group.
         #
         # @raise [ArgumentError] A required argument is missing or an argument is invalid.
         #
         def create_group(name, tiny_name: nil, start_call_on_enter: nil, end_call_on_exit: nil, members: nil)
-            # TODO
+            if name.nil? || !name.kind_of?(String) || name.empty?
+                raise ArgumentError, "Name must be a non-empty string."
+            end
+
+            values                          = { 'Name' => name }
+            values['TinyName']              = tiny_name unless tiny_name.nil?
+            values['StartGroupCallOnEnter'] = start_call_on_enter unless start_call_on_enter.nil?
+            values['EndGroupCallOnExit']    = end_call_on_exit unless end_call_on_exit.nil?
+            unless members.nil?
+                l = []
+                members.each do |member|
+                    l.push(member.to_hash)
+                end
+                values['Members'] = members unless members.empty?
+            end
+
+            url     = @endpoint.url + GROUP_PATH + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            group_detail = nil
+            begin
+                response = RestClient.post url, values, headers
+                if !response.nil?
+                    status, result = StatusResponse.from_response(response)
+                    hash           = result['Group']
+                    group_detail   = GroupDetail.from_hash(hash) unless hash.nil?
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, group_detail
         end
 
         # Get details on a specific group.
         #
         # @param [Integer] group_id (required) Numeric ID of the group to retrieve the details of.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # ApiId::   API UUID as a string.
-        # Success:: `true` or `false` indicating the success or failure of the operation.
-        # Message:: Message describing the action result.
-        # Group::   {GroupDetail} object with the details of the group but no members included.
+        # @return [Array({StatusResponse}, {GroupDetail})]
+        #   - Status of the operation.
+        #   - {GroupDetail} object with the details of the group but no members included.
         #
         # @raise [ArgumentError] A required argument is missing or an argument is invalid.
         #
         def get_group_details(group_id)
-            # TODO
+            if group_id.nil? || !group_id.kind_of?(Integer)
+                raise ArgumentError, "Group ID must be an integer."
+            end
+
+            url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            group_detail = nil
+            begin
+                response = RestClient.get url, headers
+                if !response.nil?
+                    status, result = StatusResponse.from_response(response)
+                    hash           = result['Group']
+                    group_detail   = GroupDetail.from_hash(hash) unless hash.nil?
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, group_detail
         end
 
         # Retrieve details on all groups matching the criteria given.
@@ -273,54 +358,143 @@ module SmsCountryApi
         # @param [String] start_call_on_enter Find all groups with this `start_call_on_enter` number.
         # @param [String] end_call_on_exit Find all groups with this `end_call_on_edit` number.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # ApiId::   API UUID as a string.
-        # Success:: `true` or `false` indicating the success or failure of the operation.
-        # Message:: Message describing the action result.
-        # Groups::  Array of {GroupDetail} objects with the details of the matching groups.
+        # @return [Array({StatusResponse}, Array<{GroupDetail}>)]
+        #   - Status of the operation.
+        #   - Array of {GroupDetail} objects with the details of the groups.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
         def get_group_collection(name_like: nil, tiny_name: nil, start_call_on_enter: nil, end_call_on_exit: nil)
-            # TODO
+            if (!name_like.nil? && !name_like.kind_of?(String)) ||
+                (!tiny_name.nil? && !tiny_name.kind_of?(String)) ||
+                (!start_call_on_enter.nil? && !start_call_on_enter.kind_of?(String)) ||
+                (!end_call_on_exit.nil? && !end_call_on_exit.kind_of?(String))
+                raise ArgumentError, "Invalid argument type."
+            end
+
+            url          = @endpoint.url + GROUP_PATH + '/'
+            query_string = ''
+            query_string += '&nameLike=' + CGI.escape(name_like) unless name_like.nil?
+            query_string += '&startGroupCallOnEnter=' + CGI.escape(start_call_on_enter) unless start_call_on_enter.nil?
+            query_string += '&endGroupCallOnExit=' + CGI.escape(end_call_on_exit) unless end_call_on_exit.nil?
+            query_string += '&tinyName=' + CGI.escape(tiny_name) unless tiny_name.nil?
+            unless query_string.empty?
+                query_string[0] = '?'
+                url             += query_string
+            end
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            returned_detail_list = nil
+            begin
+                response = RestClient.get url, headers
+                if !response.nil?
+                    status, result     = StatusResponse.from_response(response)
+                    group_details_list = result['Groups']
+                    if !group_details_list.nil?
+                        returned_detail_list = []
+                        group_details_list.each do |details_hash|
+                            details = GroupDetails.from_hash(details_hash)
+                            returned_detail_list.push details
+                        end
+                    else
+                        status = StatusResponse.new(false, "No list of group details included in response.")
+                    end
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, returned_detail_list
         end
 
         # Update a specific group with the new details given. Details that are not given remain unchanged.
         #
         # @param [Integer] group_id (required) Numeric ID of the group to update.
-        # @param [String] name New name for the group.
+        # @param [String] name (required) New name for the group.
         # @param [String] tiny_name New short name for the group.
         # @param [String] start_call_on_enter New `start_call_on_enter` number for the group.
         # @param [String] end_call_on_exit New `end_call_on_edit` number for the group.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # ApiId::   API UUID as a string.
-        # Success:: `true` or `false` indicating the success or failure of the operation.
-        # Message:: Message describing the action result.
+        # @return [Array({StatusResponse})]
+        #   - Status of the operation.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
-        def update_group(group_id, name: nil, tiny_name: nil, start_call_on_enter: nil, end_call_on_exit: nil)
-            # TODO
+        def update_group(group_id, name, tiny_name: nil, start_call_on_enter: nil, end_call_on_exit: nil)
+            if group_id.nil? || !group_id.kind_of?(Integer)
+                raise ArgumentError, "Group ID must be an integer."
+            end
+            if name.nil? || !name.kind_of?(String) || name.empty?
+                raise ArgumentError, "Name must be a non-empty string."
+            end
+            if (!tiny_name.nil? && !tiny_name.kind_of?(String)) ||
+                (!start_call_on_enter.nil? && !start_call_on_enter.kind_of?(String)) ||
+                (!end_call_on_exit.nil? && !end_call_on_exit.kind_of?(String))
+                raise ArgumentError, "Invalid argument type."
+            end
+
+            url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            values                          = { 'Name' => name }
+            values['TinyName']              = tiny_name unless tiny_name.nil?
+            values['StartGroupCallOnEnter'] = start_call_on_enter unless start_call_on_enter.nil?
+            values['EndGroupCallOnExit']    = end_call_on_exit unless end_call_on_exit.nil?
+
+            begin
+                response = RestClient.patch url, values, headers
+                if !response.nil?
+                    status, _ = StatusResponse.from_response(response)
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            [status]
         end
 
         # Delete a specific group.
         #
         # @param [Integer] group_id (required) Numeric ID of the group to delete.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # Success:: `true` or `false` indicating the success or failure of the operation.
+        # @return [Array({StatusResponse})]
+        #   - Status of the operation.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
         def delete_group(group_id)
-            # TODO
+            if group_id.nil? || !group_id.kind_of?(Integer)
+                raise ArgumentError, "Group ID must be an integer."
+            end
+
+            url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            begin
+                response = RestClient.delete url, headers
+                if !response.nil?
+                    status = StatusResponse.new((response.code / 100 == 2) ? true : false)
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            [status]
         end
 
         # Add a new member to an existing group.
@@ -329,36 +503,93 @@ module SmsCountryApi
         # @param [String] number (required) Number of group member.
         # @param [String] name Name of group member.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # ApiId::   API UUID as a string.
-        # Success:: `true` or `false` indicating the success or failure of the operation.
-        # Message:: Message describing the action result.
-        # Member::  {Member} object describing the new group member.
+        # @return [Array({StatusResponse}, {Member})]
+        #   - Status of the operation.
+        #   - {Member} object of newly-created member.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
         def add_member_to_group(group_id, number, name: nil)
-            # TODO
+            if group_id.nil? || !group_id.kind_of?(Integer)
+                raise ArgumentError, "Group ID must be an integer."
+            end
+            if number.nil? || !number.kind_of?(String) || number.empty?
+                raise ArgumentError, "Number must be a non-empty string."
+            end
+            if !name.nil? && !name.kind_of?(String)
+                raise ArgumentError, "Invalid argument type."
+            end
+
+            url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/' + MEMBER_PATH + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            values         = { 'Number' => number }
+            values['Name'] = name unless name.nil?
+
+            member = nil
+            begin
+                response = RestClient.post url, values, headers
+                if !response.nil?
+                    status, result = StatusResponse.from_response(response)
+                    hash           = result['Member']
+                    member         = Member.from_hash(hash) unless hash.nil?
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, member
         end
 
         # Get all members of a specific group.
         #
         # @param [Integer] group_id (required) Numeric ID of the group.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # ApiId::   API UUID as a string.
-        # Success:: `true` or `false` indicating the success or failure of the operation.
-        # Message:: Message describing the action result.
-        # Members:: Array of {Member} objects describing the group's members.
+        # @return [Array({StatusResponse}, {Member})]
+        #   - Status of the operation.
+        #   - Array of {Member} objects in the group.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
         def get_members_of_group(group_id)
-            # TODO
+            if group_id.nil? || !group_id.kind_of?(Integer)
+                raise ArgumentError, "Group ID must be an integer."
+            end
+
+            url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/' + MEMBER_PATH + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            returned_member_list = nil
+            begin
+                response = RestClient.get url, headers
+                if !response.nil?
+                    status, result      = StatusResponse.from_response(response)
+                    member_details_list = result['Members']
+                    if !member_details_list.nil?
+                        returned_member_list = []
+                        member_details_list.each do |details_hash|
+                            details = Member.from_hash(details_hash)
+                            returned_member_list.push details
+                        end
+                    else
+                        status = StatusResponse.new(false, "No list of members included in response.")
+                    end
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, returned_member_list
         end
 
         # Get details on a specific group member.
@@ -366,26 +597,51 @@ module SmsCountryApi
         # @param [Integer] group_id (required) Numeric ID of the group.
         # @param [Integer] member_id (required) Numeric ID of the member.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # ApiId::   API UUID as a string.
-        # Success:: `true` or `false` indicating the success or failure of the operation.
-        # Message:: Message describing the action result.
-        # Member::  {Member} object describing the new group member.
+        # @return [Array({StatusResponse}, {Member})]
+        #   - Status of the operation.
+        #   - {Member} object with details of requested member.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
         def get_member(group_id, member_id)
-            # TODO
+            if group_id.nil? || !group_id.kind_of?(Integer)
+                raise ArgumentError, "Group ID must be an integer."
+            end
+            if member_id.nil? || !member_id.kind_of?(Integer)
+                raise ArgumentError, "Member ID must be an integer."
+            end
+
+            url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s +
+                '/' + MEMBER_PATH + '/' + member_id.to_s + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            member = nil
+            begin
+                response = RestClient.get url, headers
+                if !response.nil?
+                    status, result = StatusResponse.from_response(response)
+                    hash           = result['Member']
+                    member         = Member.from_hash(hash) unless hash.nil?
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            return status, member
+
         end
 
         # Update the details of a specific group member.
         #
         # @param [Integer] group_id (required) Numeric ID of the group.
         # @param [Integer] member_id (required) Numeric ID of the member.
+        # @param [String] number (required) New number for group member.
         # @param [String] name New name of group member.
-        # @param [String] number New number for group member.
         #
         # @return [Hash] Response attribute hash.
         #
@@ -396,8 +652,42 @@ module SmsCountryApi
         #
         # @raise [ArgumentError] An argument is invalid.
         #
-        def update_member(group_id, member_id, name: nil, number: nil)
-            # TODO
+        def update_member(group_id, member_id, number, name: nil)
+            if group_id.nil? || !group_id.kind_of?(Integer)
+                raise ArgumentError, "Group ID must be an integer."
+            end
+            if member_id.nil? || !member_id.kind_of?(Integer)
+                raise ArgumentError, "Member ID must be an integer."
+            end
+            if number.nil? || !number.kind_of?(String) || number.empty?
+                raise ArgumentError, "Number must be a non-empty string."
+            end
+            if !name.nil? && !name.kind_of?(String)
+                raise ArgumentError, "Invalid argument type."
+            end
+
+            url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s +
+                '/' + MEMBER_PATH + '/' + member_id.to_s + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            values         = { 'Number' => number }
+            values['Name'] = name unless name.nil?
+
+            begin
+                response = RestClient.patch url, values, headers
+                if !response.nil?
+                    status, _ = StatusResponse.from_response(response)
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            [status]
         end
 
         # Delete a specific group member from the group.
@@ -413,7 +703,32 @@ module SmsCountryApi
         # @raise [ArgumentError] An argument is invalid.
         #
         def delete_member_from_group(group_id, member_id)
-            # TODO
+            if group_id.nil? || !group_id.kind_of?(Integer)
+                raise ArgumentError, "Group ID must be an integer."
+            end
+            if member_id.nil? || !member_id.kind_of?(Integer)
+                raise ArgumentError, "Member ID must be an integer."
+            end
+
+            url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s +
+                '/' + MEMBER_PATH + '/' + member_id.to_s + '/'
+            headers = {
+                content_type:  'application/json',
+                accept:        'application/json',
+                authorization: @endpoint.authorization
+            }
+
+            begin
+                response = RestClient.delete url, headers
+                if !response.nil?
+                    status = StatusResponse.new((response.code / 100 == 2) ? true : false)
+                else
+                    status = StatusResponse.new(false, "No response received.")
+                end
+            rescue StandardError => e
+                status = StatusResponse.new(false, e.to_s)
+            end
+            [status]
         end
 
     end

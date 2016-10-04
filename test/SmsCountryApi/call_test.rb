@@ -443,7 +443,7 @@ class CallTest < Minitest::Test
         end
 
         assert_raises ArgumentError do
-            status, call_uuid = client.call.initiate_call("")
+            status, call_uuid = client.call.initiate_call('')
         end
 
         assert_raises ArgumentError do
