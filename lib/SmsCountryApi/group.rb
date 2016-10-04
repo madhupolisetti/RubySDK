@@ -643,12 +643,8 @@ module SmsCountryApi
         # @param [String] number (required) New number for group member.
         # @param [String] name New name of group member.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # ApiId::   API UUID as a string.
-        # Success:: `true` or `false` indicating the success or failure of the operation.
-        # Message:: Message describing the action result.
+        # @return [Array({StatusResponse})]
+        #   - Status of the operation.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
@@ -695,10 +691,8 @@ module SmsCountryApi
         # @param [Integer] group_id (required) Numeric ID of the group.
         # @param [Integer] member_id (required) Numeric ID of the member.
         #
-        # @return [Hash] Response attribute hash.
-        #
-        # === Response attribute hash items:
-        # Success:: `true` or `false` indicating the success or failure of the operation.
+        # @return [Array({StatusResponse})]
+        #   - Status of the operation.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
