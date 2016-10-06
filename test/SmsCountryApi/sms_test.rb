@@ -29,6 +29,31 @@ class SMSTest < Minitest::Test
 
     end
 
+    def test_smsdetails_to_hash
+
+        t    = Time.now
+        hash = { 'MessageUUID' => UUID,
+                 'Number'      => PHONE_NUMBER,
+                 'Tool'        => 'api',
+                 'SenderId'    => 'SMSCountry',
+                 'Text'        => 'Text of message',
+                 'Status'      => 'received',
+                 'StatusTime'  => t.to_i.to_s,
+                 'Cost'        => "1.25 USD" }
+        obj  = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, 'Text of message',
+                                                     tool:        'api',
+                                                     sender_id:   "SMSCountry",
+                                                     status:      'received',
+                                                     status_time: t,
+                                                     cost:        '1.25 USD')
+        new_hash = obj.to_hash
+        refute_nil new_hash, "New hash not created."
+        new_hash.each do |k, v|
+            assert_equal hash[k], v, "{k} item did not match."
+        end
+
+    end
+
     def test_smsdetails_create
 
         # Required arguments only
@@ -189,31 +214,6 @@ class SMSTest < Minitest::Test
 
         assert_raises ArgumentError do
             obj = SmsCountryApi::SMS::SmsDetails.from_hash('')
-        end
-
-    end
-
-    def test_smsdetails_to_hash
-
-        t    = Time.now
-        hash = { 'MessageUUID' => UUID,
-                 'Number'      => PHONE_NUMBER,
-                 'Tool'        => 'api',
-                 'SenderId'    => 'SMSCountry',
-                 'Text'        => 'Text of message',
-                 'Status'      => 'received',
-                 'StatusTime'  => t.to_i.to_s,
-                 'Cost'        => "1.25 USD" }
-        obj  = SmsCountryApi::SMS::SmsDetails.create(UUID, PHONE_NUMBER, 'Text of message',
-                                                     tool:        'api',
-                                                     sender_id:   "SMSCountry",
-                                                     status:      'received',
-                                                     status_time: t,
-                                                     cost:        '1.25 USD')
-        new_hash = obj.to_hash
-        refute_nil new_hash, "New hash not created."
-        new_hash.each do |k, v|
-            assert_equal hash[k], v, "{k} item did not match."
         end
 
     end
