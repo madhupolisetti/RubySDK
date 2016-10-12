@@ -49,7 +49,7 @@ class SMSTest < Minitest::Test
         new_hash = obj.to_hash
         refute_nil new_hash, "New hash not created."
         new_hash.each do |k, v|
-            assert_equal hash[k], v, "{k} item did not match."
+            assert_equal hash[k], v, "#{k} item did not match."
         end
 
     end

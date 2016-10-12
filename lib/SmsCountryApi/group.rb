@@ -65,11 +65,11 @@ module SmsCountryApi
             #
             # @raise [ArgumentError] A required argument is missing or an argument is invalid.
             #
-            def self.create(number, name: nil, id: 0)
+            def self.create(number, name: nil, id: nil)
                 if number.nil? || !number.kind_of?(String) || number.empty?
                     raise ArgumentError, "Number must be a non-empty string."
                 end
-                if (!name.nil? && !name.kind_of?(String)) ||
+                if (!name.nil? && (!name.kind_of?(String) || name.empty?)) ||
                     (!id.nil? && !id.kind_of?(Integer))
                     raise ArgumentError, "Invalid argument type."
                 end
@@ -88,15 +88,20 @@ module SmsCountryApi
             # @return [{Member}] New member object.
             #
             def self.from_hash(hash)
+                if hash.nil? || !hash.kind_of?(Hash)
+                    raise ArgumentError, "Argument must be a hash."
+                end
                 obj = Member.new
-                hash.each do |k, v|
-                    case k
-                    when 'Number' then
-                        obj.number = CGI.unescape(v) unless v.nil?
-                    when 'Name' then
-                        obj.name = CGI.unescape(v) unless v.nil?
-                    when 'Id' then
-                        obj.id = CGI.unescape(v).to_i unless v.nil?
+                unless hash.nil?
+                    hash.each do |k, v|
+                        case k
+                        when 'Number' then
+                            obj.number = CGI.unescape(v) unless v.nil?
+                        when 'Name' then
+                            obj.name = CGI.unescape(v) unless v.nil?
+                        when 'Id' then
+                            obj.id = v unless v.nil?
+                        end
                     end
                 end
                 obj
@@ -162,7 +167,7 @@ module SmsCountryApi
                     @members.each do |member|
                         l.push(member.to_hash)
                     end
-                    hash['Members'] = members unless members.empty?
+                    hash['Members'] = l unless l.empty?
                 end
                 hash
             end
@@ -182,7 +187,7 @@ module SmsCountryApi
             #
             # @raise [ArgumentError] A required argument is missing or an argument is invalid.
             #
-            def self.create(name, tiny_name: nil, start_call_on_enter: nil, end_call_on_exit: nil, members: nil, id: 0)
+            def self.create(name, tiny_name: nil, start_call_on_enter: nil, end_call_on_exit: nil, members: nil, id: nil)
                 if name.nil? || !name.kind_of?(String) || name.empty?
                     raise ArgumentError, "Name must be a non-empty string."
                 end
@@ -211,6 +216,9 @@ module SmsCountryApi
             # @return [{GroupDetail}] New group detail object.
             #
             def self.from_hash(hash)
+                if hash.nil? || !hash.kind_of?(Hash)
+                    raise ArgumentError, "Argument must be a hash."
+                end
                 obj = GroupDetail.new
                 hash.each do |k, v|
                     case k
@@ -223,7 +231,7 @@ module SmsCountryApi
                     when 'EndGroupCallOnExit' then
                         obj.end_call_on_exit = CGI.unescape(v) unless v.nil?
                     when 'Id' then
-                        obj.id = CGI.unescape(v).to_i unless v.nil?
+                        obj.id = v unless v.nil?
                     when 'Members' then
                         unless v.nil?
                             member_list = []
@@ -397,7 +405,7 @@ module SmsCountryApi
                     if !group_details_list.nil?
                         returned_detail_list = []
                         group_details_list.each do |details_hash|
-                            details = GroupDetails.from_hash(details_hash)
+                            details = GroupDetail.from_hash(details_hash)
                             returned_detail_list.push details
                         end
                     else

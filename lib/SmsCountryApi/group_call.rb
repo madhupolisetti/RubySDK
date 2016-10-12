@@ -61,6 +61,7 @@ module SmsCountryApi
                 hash                  = {}
                 hash['RecordingUUID'] = @uuid unless @uuid.nil?
                 hash['Url']           = @url unless @url.nil?
+                hash
             end
 
             # Construct a recording object from a UUID and a URL.
@@ -91,6 +92,9 @@ module SmsCountryApi
             # @return [{Recording}] New recording object.
             #
             def self.from_hash(hash)
+                if hash.nil? || !hash.kind_of?(Hash)
+                    raise ArgumentError, "Argument must be a hash."
+                end
                 obj = Recording.new
                 hash.each do |k, v|
                     case k
@@ -146,7 +150,14 @@ module SmsCountryApi
                 hash['Id']     = @id unless @id.nil?
                 hash['Name']   = @name unless @name.nil?
                 hash['Number'] = @number unless @number.nil?
-                hash['Calls']  = @calls unless @calls.nil?
+                unless @calls.nil?
+                    l = []
+                    @calls.each do |call|
+                        l.push(call.to_hash)
+                    end
+                    hash['Calls'] = l
+                end
+                hash
             end
 
             # Construct a participant object from a name and number.
@@ -160,9 +171,14 @@ module SmsCountryApi
             #
             # @raise [ArgumentError] A required argument is missing or an argument is invalid.
             #
-            def self.create(number, name: nil, id: 0, calls: nil)
+            def self.create(number, name: nil, id: nil, calls: nil)
                 if number.nil? || !number.kind_of?(String) || number.empty?
                     raise ArgumentError, "Number must be a non-empty string."
+                end
+                if (!name.nil? && !name.kind_of?(String)) ||
+                    (!id.nil? && !id.kind_of?(Integer)) ||
+                    (!calls.nil? && !calls.kind_of?(Array))
+                    raise ArgumentError, "Illegal argument type."
                 end
 
                 obj        = Participant.new
@@ -180,6 +196,9 @@ module SmsCountryApi
             # @return [{Participant}] New participant object.
             #
             def self.from_hash(hash)
+                if hash.nil? || !hash.kind_of?(Hash)
+                    raise ArgumentError, "Argument must be a hash."
+                end
                 obj = Participant.new
                 hash.each do |k, v|
                     case k
@@ -195,7 +214,7 @@ module SmsCountryApi
                             call_list.push(Call::CallDetails.from_hash(p))
                         end
                         unless call_list.empty?
-                            obj.participants = call_list
+                            obj.calls = call_list
                         end
                     end
                 end
@@ -270,6 +289,7 @@ module SmsCountryApi
                     end
                     hash['Participants'] = participant_list
                 end
+                hash
             end
 
             # Construct an object describing a specific group call.
@@ -277,21 +297,32 @@ module SmsCountryApi
             # @param [String] uuid (required) Alphanumeric UUID of this call.
             # @param [Array<Participant>] participants List of participants in the call.
             #
-            # @return [{Call}] New Call object.
+            # @return [{GroupCallDetails}] New Call object.
             #
             # @raise [ArgumentError] A required argument is missing or an argument is invalid.
             #
-            def self.create(uuid, participants: nil)
+            def self.create(uuid, name: nil, welcome_sound: nil, wait_sound: nil,
+                start_call_on_enter: nil, end_call_on_exit: nil, participants: nil)
                 if uuid.nil? || !uuid.kind_of?(String) || uuid.empty?
                     raise ArgumentError, "UUID must be a non-empty string."
                 end
-                if !participants.nil? && !participants.kind_of?(Array)
-                    raise ArgumentError, "Participants argument must be an array."
+                if (!name.nil? && !name.kind_of?(String)) ||
+                    (!welcome_sound.nil? && !welcome_sound.kind_of?(String)) ||
+                    (!wait_sound.nil? && !wait_sound.kind_of?(String)) ||
+                    (!start_call_on_enter.nil? && !start_call_on_enter.kind_of?(String)) ||
+                    (!end_call_on_exit.nil? && !end_call_on_exit.kind_of?(String)) ||
+                    (!participants.nil? && !participants.kind_of?(Array))
+                    raise ArgumentError, "Illegal argument type."
                 end
 
-                obj              = GroupCallDetails.new
-                obj.uuid         = uuid
-                obj.participants = participants
+                obj                     = GroupCallDetails.new
+                obj.uuid                = uuid
+                obj.name                = name unless name.nil?
+                obj.welcome_sound       = welcome_sound unless welcome_sound.nil?
+                obj.wait_sound          = wait_sound unless wait_sound.nil?
+                obj.start_call_on_enter = start_call_on_enter unless start_call_on_enter.nil?
+                obj.end_call_on_exit    = end_call_on_exit unless end_call_on_exit.nil?
+                obj.participants        = participants unless participants.nil?
                 obj
             end
 
@@ -299,14 +330,27 @@ module SmsCountryApi
             #
             # @param [Hash] hash Hash from the response.
             #
-            # @return [{Call}] New group call object.
+            # @return [{GroupCallDetails}] New group call object.
             #
             def self.from_hash(hash)
+                if hash.nil? || !hash.kind_of?(Hash)
+                    raise ArgumentError, "Argument must be a hash."
+                end
                 obj = GroupCallDetails.new
                 hash.each do |k, v|
                     case k
                     when 'GroupCallUUID' then
-                        obj.call_uuid = CGI.unescape(v) unless v.nil?
+                        obj.uuid = CGI.unescape(v) unless v.nil?
+                    when 'Name' then
+                        obj.name = CGI.unescape(v) unless v.nil?
+                    when 'WelcomeSound' then
+                        obj.welcome_sound = CGI.unescape(v) unless v.nil?
+                    when 'WaitSound' then
+                        obj.wait_sound = CGI.unescape(v) unless v.nil?
+                    when 'StartGroupCallOnEnter' then
+                        obj.start_call_on_enter = CGI.unescape(v) unless v.nil?
+                    when 'EndGroupCallOnExit' then
+                        obj.end_call_on_exit = CGI.unescape(v) unless v.nil?
                     when 'Participants' then
                         unless v.nil?
                             participant_list = []
@@ -364,8 +408,8 @@ module SmsCountryApi
             if name.nil? || !name.kind_of?(String) || name.empty?
                 raise ArgumentError, "Name must be a non-empty string."
             end
-            if participants.nil? || !participants.kind_of?(Array)
-                raise ArgumentError, "Participant list must be an array."
+            if participants.nil? || !participants.kind_of?(Array) || participants.empty?
+                raise ArgumentError, "Participant list must be a non-empty array."
             end
             if (!welcome_sound.nil? && !welcome_sound.kind_of?(String)) ||
                 (!wait_sound.nil? && !wait_sound.kind_of?(String)) ||
@@ -747,11 +791,11 @@ module SmsCountryApi
         #
         # @raise [ArgumentError] An argument is invalid.
         #
-        def mute_participants(call_uuid, participant_id)
+        def mute_participant(call_uuid, participant_id)
             if call_uuid.nil? || !call_uuid.kind_of?(String) || call_uuid.empty?
                 raise ArgumentError, "Call UUID must be a non-empty string."
             end
-            if !participant_id && !participant_id.kind_of?(Integer)
+            if !participant_id.nil? && !participant_id.kind_of?(Integer)
                 raise ArgumentError, "Participant ID must be an integer or nil."
             end
 
@@ -802,11 +846,11 @@ module SmsCountryApi
         #
         # @raise [ArgumentError] An argument is invalid.
         #
-        def unmute_participants(call_uuid, participant_id)
+        def unmute_participant(call_uuid, participant_id)
             if call_uuid.nil? || !call_uuid.kind_of?(String) || call_uuid.empty?
                 raise ArgumentError, "Call UUID must be a non-empty string."
             end
-            if !participant_id && !participant_id.kind_of?(Integer)
+            if !participant_id.nil? && !participant_id.kind_of?(Integer)
                 raise ArgumentError, "Participant ID must be an integer or nil."
             end
 
@@ -982,9 +1026,6 @@ module SmsCountryApi
                 if !response.nil?
                     status, result = StatusResponse.from_response(response)
                     if recording_uuid.nil?
-                        hash    = result['Recording']
-                        results = Recording.from_hash(hash) unless hash.nil?
-                    else
                         hash = result['Recordings']
                         unless hash.nil?
                             results = []
@@ -992,6 +1033,9 @@ module SmsCountryApi
                                 results.push(Recording.from_hash(recording))
                             end
                         end
+                    else
+                        hash    = result['Recording']
+                        results = Recording.from_hash(hash) unless hash.nil?
                     end
                 else
                     status = StatusResponse.new(false, "No response received.")
@@ -1032,11 +1076,11 @@ module SmsCountryApi
             }
 
             begin
-                response = RestClient.patch url, nil, headers
-                if !response.nil?
-                    status, _ = StatusResponse.from_response(response)
+                response = RestClient.delete url, headers
+                if response.code / 100 == 2
+                    status = StatusResponse.new(true)
                 else
-                    status = StatusResponse.new(false, "No response received.")
+                    status = StatusResponse.new(false, "HTTP status code #{response.code}")
                 end
             rescue StandardError => e
                 status = StatusResponse.new(false, e.to_s)
