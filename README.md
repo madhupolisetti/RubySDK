@@ -2,11 +2,42 @@
 
 Ruby wrapper for the SMSCountry web service API.
 
+## Building the gem
+
+Before you can start building the gem, you need to have the latest bundler package
+installed. This should be part of your normal Ruby tool chain.
+
+The gem can be build with the standard sequence of commands run from the gem's
+top-level source directory:
+
+    bundle install
+
+Thos command installs the necessary dependencies based on the Gemfile for
+the gem. If dependencies are already installed (from a previous install), then the
+sequence:
+
+    bundle update
+
+command will update the dependencies to the most recent versions that are compatible
+with the conditions set in the Gemfile.
+
+Note that `bundle update` won't install new/missing dependencies. `bundle install` does
+that, and must be used if any new dependencies are added to the Gemfile. That's also why
+it needs to be run initially before the gem can be built.
+
+Once the dependencies are installed, the command:
+
+    gem build SmsCountryApi.gemspec
+
+will build and package the gem into `SmsCountryApi-X.Y.Z.gem` (where X.Y.Z is the
+version number of the gem).
+
 ## Installation
 
-Installation of the gem must be done using the gemfile directly:
+Installation of the gem version X.Y.Z is done using the gemfile directly since this
+gem isn't published to `rubygems.org`:
 
-    gem install SmsCountryApi.gem
+    gem install SmsCountryApi-X.Y.Z.gem
 
 This gem depends on `rest-client` and `json`. When installing it you must
 have those gems installed or be able to have those gems and their dependencies
