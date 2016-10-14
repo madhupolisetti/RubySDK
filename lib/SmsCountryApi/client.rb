@@ -5,6 +5,8 @@
 #
 #-----
 
+require 'exception'
+
 module SmsCountryApi
 
     # Client object containing all objects needed to fully use the SMSCountry API.
@@ -53,14 +55,16 @@ module SmsCountryApi
     # @return [Client] Client object configured for the application default service endpoint.
     #
     # @raise [ArgumentError] One or more arguments are not valid.
+    # @raise [NotImplementedError] This function hasn't been implemented yet.
     #
-    def self.create_client
-        # TODO create the endpoint from the configuration data
-        endpoint = Endpoint.new('abcdefghijkl', 'xyzzy')
-        Client.new(endpoint)
+    def self.create_client_from_config
+        # TODO create the endpoint from application configuration data
+        raise NotImplementedError, "#create_client_from_config is not implemented yet."
     end
 
-    # Create a new client based on passed-in service endpoint settings.
+    # Create a new client based on the arguments. The authentication information and
+    # service endpoint URL components are provided in arguments. By default a client
+    # using the default production service endpoint is created.
     #
     # @param [String] key (required) Authentication key.
     # @param [String] token (required) Authentication token.
@@ -72,7 +76,7 @@ module SmsCountryApi
     #
     # @raise [ArgumentError] One or more arguments are not valid.
     #
-    def self.create_custom_client(key, token, protocol: 'http', host: nil, path: nil)
+    def self.create_client(key, token, protocol: 'http', host: nil, path: nil)
         if key.nil? || !key.kind_of?(String) || key.empty? ||
             token.nil? || !token.kind_of?(String) || token.empty?
             raise ArgumentError, "Key and token must be non-empty strings."

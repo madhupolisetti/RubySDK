@@ -60,8 +60,8 @@ A basic program using the SMS interface to send a message and then retrieve it's
 
     require 'SmsCountryApi'
 
-    # Create an API client object using the application default configuration.
-    client = SmsCountryApi::Client.create_client()
+    # Create an API client object.
+    client = SmsCountryApi::Client.create_client('authentication key', 'authentication token')
 
     # Send a single message to a fixed number.
     status, message_uuid = client.sms.send("91XXXXXXXXXX", "Example message.", sender_id: "SMSCountry",
@@ -95,7 +95,7 @@ web service. The caller is responsible for checking results for validity.
     require 'SmsCountryApi'
 
     # Create an API client object using the application default configuration.
-    client = SmsCountryApi::Client.create_client()
+    client = SmsCountryApi::Client.create_client('authentication key', 'authentication token')
 
     # Set up the list of numbers to send to, and send the message group.
     number_list = ["91XXXXXXAAAA", "91XXXXXXBBBB", "91XXXXXXCCCC"]
