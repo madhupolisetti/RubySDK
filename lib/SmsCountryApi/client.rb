@@ -5,8 +5,6 @@
 #
 #-----
 
-require 'exception'
-
 module SmsCountryApi
 
     # Client object containing all objects needed to fully use the SMSCountry API.

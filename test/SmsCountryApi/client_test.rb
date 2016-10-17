@@ -32,45 +32,37 @@ class ClientTest < Minitest::Test
 
     def test_create_client
 
-        obj = SmsCountryApi.create_client
-        refute_nil obj, "Client object was not successfully created."
-        assert_kind_of SmsCountryApi::Client, obj, "Created object is of the wrong type."
-
-    end
-
-    def test_create_custom_client
-
-        obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy")
+        obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy")
         refute_nil obj, "Client object was not successfully created."
         assert_kind_of SmsCountryApi::Client, obj, "Created object is of the wrong type."
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client(nil, "xyzzy")
+            obj = SmsCountryApi.create_client(nil, "xyzzy")
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client('', "xyzzy")
+            obj = SmsCountryApi.create_client('', "xyzzy")
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client(5, "xyzzy")
+            obj = SmsCountryApi.create_client(5, "xyzzy")
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", nil)
+            obj = SmsCountryApi.create_client("abcdefghijkl", nil)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", '')
+            obj = SmsCountryApi.create_client("abcdefghijkl", '')
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", 5)
+            obj = SmsCountryApi.create_client("abcdefghijkl", 5)
         end
 
-        obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy",
+        obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy",
                                                  protocol: 'http',
                                                  host:     'localhost',
                                                  path:     '/api/endpoint')
         refute_nil obj, "Client object was not successfully created."
         assert_kind_of SmsCountryApi::Client, obj, "Created object is of the wrong type."
 
-        obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy",
+        obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy",
                                                  protocol: 'http',
                                                  host:     'localhost',
                                                  path:     '')
@@ -78,49 +70,49 @@ class ClientTest < Minitest::Test
         assert_kind_of SmsCountryApi::Client, obj, "Created object is of the wrong type."
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy",
+            obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy",
                                                      protocol: nil,
                                                      host:     'localhost',
                                                      path:     '/api/endpoint')
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy",
+            obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy",
                                                      protocol: '',
                                                      host:     'localhost',
                                                      path:     '/api/endpoint')
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy",
+            obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy",
                                                      protocol: 15,
                                                      host:     'localhost',
                                                      path:     '/api/endpoint')
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy",
+            obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy",
                                                      protocol: 'ftp',
                                                      host:     'localhost',
                                                      path:     '/api/endpoint')
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy",
+            obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy",
                                                      protocol: 'http',
                                                      host:     '',
                                                      path:     '/api/endpoint')
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy",
+            obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy",
                                                      protocol: 'http',
                                                      host:     15,
                                                      path:     '/api/endpoint')
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi.create_custom_client("abcdefghijkl", "xyzzy",
+            obj = SmsCountryApi.create_client("abcdefghijkl", "xyzzy",
                                                      protocol: 'http',
                                                      host:     'localhost',
                                                      path:     15)
