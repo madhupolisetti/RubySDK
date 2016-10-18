@@ -299,15 +299,11 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + GROUP_PATH + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             group_detail = nil
             begin
-                response = RestClient.post url, values, headers
+                response = RestClient.post url, values.to_json, headers
                 if !response.nil?
                     status, result = StatusResponse.from_response(response)
                     hash           = result['Group']
@@ -337,11 +333,7 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             group_detail = nil
             begin
@@ -390,11 +382,7 @@ module SmsCountryApi
                 query_string[0] = '?'
                 url             += query_string
             end
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             returned_detail_list = nil
             begin
@@ -447,11 +435,7 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             values                          = { 'Name' => name }
             values['TinyName']              = tiny_name unless tiny_name.nil?
@@ -459,7 +443,7 @@ module SmsCountryApi
             values['EndGroupCallOnExit']    = end_call_on_exit unless end_call_on_exit.nil?
 
             begin
-                response = RestClient.patch url, values, headers
+                response = RestClient.patch url, values.to_json, headers
                 if !response.nil?
                     status, _ = StatusResponse.from_response(response)
                 else
@@ -486,11 +470,7 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             begin
                 response = RestClient.delete url, headers
@@ -529,18 +509,14 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/' + MEMBER_PATH + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             values         = { 'Number' => number }
             values['Name'] = name unless name.nil?
 
             member = nil
             begin
-                response = RestClient.post url, values, headers
+                response = RestClient.post url, values.to_json, headers
                 if !response.nil?
                     status, result = StatusResponse.from_response(response)
                     hash           = result['Member']
@@ -570,11 +546,7 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s + '/' + MEMBER_PATH + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             returned_member_list = nil
             begin
@@ -621,11 +593,7 @@ module SmsCountryApi
 
             url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s +
                 '/' + MEMBER_PATH + '/' + member_id.to_s + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             member = nil
             begin
@@ -672,17 +640,13 @@ module SmsCountryApi
 
             url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s +
                 '/' + MEMBER_PATH + '/' + member_id.to_s + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             values         = { 'Number' => number }
             values['Name'] = name unless name.nil?
 
             begin
-                response = RestClient.patch url, values, headers
+                response = RestClient.patch url, values.to_json, headers
                 if !response.nil?
                     status, _ = StatusResponse.from_response(response)
                 else
@@ -714,11 +678,7 @@ module SmsCountryApi
 
             url     = @endpoint.url + GROUP_PATH + '/' + group_id.to_s +
                 '/' + MEMBER_PATH + '/' + member_id.to_s + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             begin
                 response = RestClient.delete url, headers

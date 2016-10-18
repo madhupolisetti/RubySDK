@@ -5,7 +5,7 @@
 #
 #-----
 
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../../../test_helper", __FILE__)
 require 'base64'
 require 'webmock/minitest'
 
@@ -100,7 +100,7 @@ class GroupCallTest < Minitest::Test
 
         t          = Time.now
         call1_hash = { 'CallUUID'      => UUID,
-                       'Number'        => PHONE_NUMBER,
+                       'Number'        => PHONE_NUMBER_1,
                        'CallerId'      => 'SMSCountry',
                        'Status'        => 'completed',
                        'RingTime'      => t.to_i.to_s,
@@ -166,7 +166,7 @@ class GroupCallTest < Minitest::Test
 
         t          = Time.now
         call1_hash = { 'CallUUID'      => UUID,
-                       'Number'        => PHONE_NUMBER,
+                       'Number'        => PHONE_NUMBER_1,
                        'CallerId'      => 'SMSCountry',
                        'Status'        => 'completed',
                        'RingTime'      => t.to_i.to_s,
@@ -211,15 +211,15 @@ class GroupCallTest < Minitest::Test
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBER, name: 754)
+            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBER_1, name: 754)
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBER, id: '')
+            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBER_1, id: '')
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBER, calls: '')
+            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBER_1, calls: '')
         end
 
     end
@@ -228,7 +228,7 @@ class GroupCallTest < Minitest::Test
 
         t          = Time.now
         call1_hash = { 'CallUUID'      => UUID,
-                       'Number'        => PHONE_NUMBER,
+                       'Number'        => PHONE_NUMBER_1,
                        'CallerId'      => 'SMSCountry',
                        'Status'        => 'completed',
                        'RingTime'      => t.to_i.to_s,
@@ -293,7 +293,7 @@ class GroupCallTest < Minitest::Test
 
         t                 = Time.now
         call1_hash        = { 'CallUUID'      => UUID,
-                              'Number'        => PHONE_NUMBER,
+                              'Number'        => PHONE_NUMBER_1,
                               'CallerId'      => 'SMSCountry',
                               'Status'        => 'completed',
                               'RingTime'      => t.to_i.to_s,
@@ -367,7 +367,7 @@ class GroupCallTest < Minitest::Test
 
         t                 = Time.now
         call1_hash        = { 'CallUUID'      => UUID,
-                              'Number'        => PHONE_NUMBER,
+                              'Number'        => PHONE_NUMBER_1,
                               'CallerId'      => 'SMSCountry',
                               'Status'        => 'completed',
                               'RingTime'      => t.to_i.to_s,
@@ -463,7 +463,7 @@ class GroupCallTest < Minitest::Test
 
         t                 = Time.now
         call1_hash        = { 'CallUUID'      => UUID,
-                              'Number'        => PHONE_NUMBER,
+                              'Number'        => PHONE_NUMBER_1,
                               'CallerId'      => 'SMSCountry',
                               'Status'        => 'completed',
                               'RingTime'      => t.to_i.to_s,
@@ -561,7 +561,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('GroupCalls'))
             .to_return(status: 202, body: { 'Success'   => true,
                                             'Message'   => "Operation succeeded",
                                             'ApiId'     => API_ID,
@@ -595,7 +595,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('GroupCalls'))
             .to_return(status: 202, body: { 'Success'   => true,
                                             'Message'   => "Operation succeeded",
                                             'ApiId'     => API_ID,
@@ -633,7 +633,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('GroupCalls'))
             .to_return(status: 202, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -718,9 +718,17 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        participant1_hash = { 'Name'   => 'somebody',
+                              'Number' => "91XXXXXXXXXX" }
+        participant2_hash = { 'Name'   => 'nobody',
+                              'Number' => "91XXXXXXYYYY" }
+        participant1      = SmsCountryApi::GroupCall::Participant.from_hash(participant1_hash)
+        participant2      = SmsCountryApi::GroupCall::Participant.from_hash(participant2_hash)
+
+        stub_request(:post, mock_uri('GroupCalls'))
             .to_raise(StandardError)
-        status, group_call = client.call.initiate_bulk_call([PHONE_NUMBER])
+
+        status, group_call = client.group_call.initiate_group_call('group call 1', [participant1, participant2])
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "Exception from WebMock", status.message, "Unexpected error message encountered."
@@ -737,7 +745,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID))
             .to_return(status: 200, body: { 'Success'   => true,
                                             'Message'   => "Operation succeeded",
                                             'ApiId'     => API_ID,
@@ -766,7 +774,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -790,7 +798,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID))
             .to_raise(StandardError)
 
         status, details = client.group_call.get_group_call_details(UUID)
@@ -810,7 +818,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls'))
             .to_return(status: 200, body: { 'Success'    => true,
                                             'Message'    => "Operation succeeded",
                                             'ApiId'      => API_ID,
@@ -842,11 +850,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
-            .to_return(status: 200, body: { 'Success' => false,
-                                            'Message' => "Operation failed",
-                                            'ApiId'   => API_ID }.to_json)
-        stub_request(:get, MOCK_URI).with(query: { 'FromDate' => '2016-09-15 00:00:00' })
+        stub_request(:get, mock_uri('GroupCalls')).with(query: { 'FromDate' => '2016-09-15 00:00:00' })
             .to_return(status: 200, body: { 'Success'    => true,
                                             'Message'    => "Operation succeeded",
                                             'ApiId'      => API_ID,
@@ -873,11 +877,7 @@ class GroupCallTest < Minitest::Test
 
         WebMock.reset!
 
-        stub_request(:get, MOCK_URI)
-            .to_return(status: 200, body: { 'Success' => false,
-                                            'Message' => "Operation failed",
-                                            'ApiId'   => API_ID }.to_json)
-        stub_request(:get, MOCK_URI).with(query: { 'ToDate' => '2016-09-15 00:00:00' })
+        stub_request(:get, mock_uri('GroupCalls')).with(query: { 'ToDate' => '2016-09-15 00:00:00' })
             .to_return(status: 200, body: { 'Success'    => true,
                                             'Message'    => "Operation succeeded",
                                             'ApiId'      => API_ID,
@@ -904,11 +904,7 @@ class GroupCallTest < Minitest::Test
 
         WebMock.reset!
 
-        stub_request(:get, MOCK_URI)
-            .to_return(status: 200, body: { 'Success' => false,
-                                            'Message' => "Operation failed",
-                                            'ApiId'   => API_ID }.to_json)
-        stub_request(:get, MOCK_URI).with(query: { 'Offset' => '5' })
+        stub_request(:get, mock_uri('GroupCalls')).with(query: { 'Offset' => '5' })
             .to_return(status: 200, body: { 'Success'    => true,
                                             'Message'    => "Operation succeeded",
                                             'ApiId'      => API_ID,
@@ -935,11 +931,7 @@ class GroupCallTest < Minitest::Test
 
         WebMock.reset!
 
-        stub_request(:get, MOCK_URI)
-            .to_return(status: 200, body: { 'Success' => false,
-                                            'Message' => "Operation failed",
-                                            'ApiId'   => API_ID }.to_json)
-        stub_request(:get, MOCK_URI).with(query: { 'Limit' => '8' })
+        stub_request(:get, mock_uri('GroupCalls')).with(query: { 'Limit' => '8' })
             .to_return(status: 200, body: { 'Success'    => true,
                                             'Message'    => "Operation succeeded",
                                             'ApiId'      => API_ID,
@@ -971,7 +963,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls'))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -998,7 +990,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls'))
             .to_raise(StandardError)
 
         status, detail_list = client.group_call.get_group_call_collection
@@ -1018,13 +1010,13 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Participants', '15'))
             .to_return(status: 200, body: { 'Success'     => true,
                                             'Message'     => "Operation succeeded",
                                             'ApiId'       => API_ID,
                                             'Participant' => { 'Id'     => 15,
                                                                'Name'   => 'somebody',
-                                                               'Number' => PHONE_NUMBER } }.to_json)
+                                                               'Number' => PHONE_NUMBER_1 } }.to_json)
 
         status, participant = client.group_call.get_participant(UUID, 15)
         refute_nil status, "No status object returned."
@@ -1032,7 +1024,7 @@ class GroupCallTest < Minitest::Test
         refute_nil participant, "No participant returned."
         assert_equal 15, participant.id, "ID doesn't match."
         assert_equal 'somebody', participant.name, "Name doesn't match."
-        assert_equal PHONE_NUMBER, participant.number, "Number doesn't match."
+        assert_equal PHONE_NUMBER_1, participant.number, "Number doesn't match."
 
     end
 
@@ -1041,7 +1033,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Participants', '15'))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1070,7 +1062,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Participants', '15'))
             .to_raise(StandardError)
 
         status, participant = client.group_call.get_participant(UUID, 15)
@@ -1090,13 +1082,13 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Participants'))
             .to_return(status: 200, body: { 'Success'      => true,
                                             'Message'      => "Operation succeeded",
                                             'ApiId'        => API_ID,
                                             'Participants' => [{ 'Id'     => 15,
                                                                  'Name'   => 'somebody',
-                                                                 'Number' => PHONE_NUMBER },
+                                                                 'Number' => PHONE_NUMBER_1 },
                                                                { 'Id'     => 29,
                                                                  'Name'   => 'nobody',
                                                                  'Number' => "91XXXXXXYYYY" }] }.to_json)
@@ -1108,7 +1100,7 @@ class GroupCallTest < Minitest::Test
         assert_equal 2, participants.length, "Participant list length isn't correct."
         assert_equal 15, participants[0].id, "Participant 1 ID doesn't match."
         assert_equal 'somebody', participants[0].name, "Participant 1 name doesn't match."
-        assert_equal PHONE_NUMBER, participants[0].number, "Participant 1 number doesn't match."
+        assert_equal PHONE_NUMBER_1, participants[0].number, "Participant 1 number doesn't match."
         assert_equal 29, participants[1].id, "Participant 2 ID doesn't match."
         assert_equal 'nobody', participants[1].name, "Participant 2 name doesn't match."
         assert_equal '91XXXXXXYYYY', participants[1].number, "Participant 2 number doesn't match."
@@ -1120,7 +1112,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Participants'))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1142,7 +1134,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Participants'))
             .to_raise(StandardError)
 
         status, participants = client.group_call.get_participants(UUID)
@@ -1162,7 +1154,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Hangup'))
             .to_return(status: 202, body: { 'Success'                => true,
                                             'Message'                => "Operation succeeded",
                                             'ApiId'                  => API_ID,
@@ -1186,7 +1178,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Hangup'))
             .to_return(status: 202, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1208,7 +1200,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Hangup'))
             .to_raise(StandardError)
 
         status, participants = client.group_call.terminate_group_call(UUID)
@@ -1228,7 +1220,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Participants', '15', 'Hangup'))
             .to_return(status: 202, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
@@ -1244,7 +1236,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Participants', '15', 'Hangup'))
             .to_return(status: 202, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1273,7 +1265,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Participants', '15', 'Hangup'))
             .to_raise(StandardError)
 
         status, = client.group_call.terminate_participant(UUID, 15)
@@ -1292,7 +1284,11 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('GroupCalls', UUID, 'Participants', '15', 'Play'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID }.to_json)
+        stub_request(:post, mock_uri('GroupCalls', UUID, 'Play'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
@@ -1312,7 +1308,11 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('GroupCalls', UUID, 'Participants', '15', 'Play'))
+            .to_return(status: 200, body: { 'Success' => false,
+                                            'Message' => "Operation failed",
+                                            'ApiId'   => API_ID }.to_json)
+        stub_request(:post, mock_uri('GroupCalls', UUID, 'Play'))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1348,7 +1348,9 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('GroupCalls', UUID, 'Participants', '15', 'Play'))
+            .to_raise(StandardError)
+        stub_request(:post, mock_uri('GroupCalls', UUID, 'Play'))
             .to_raise(StandardError)
 
         status, = client.group_call.play_sound_into_call(UUID, 15, 'test url')
@@ -1372,7 +1374,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Participants', '15', 'Mute'))
             .to_return(status: 202, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
@@ -1389,7 +1391,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Mute'))
             .to_return(status: 202, body: { 'Success'              => true,
                                             'Message'              => "Operation succeeded",
                                             'ApiId'                => API_ID,
@@ -1411,7 +1413,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Participants', '15', 'Mute'))
             .to_return(status: 202, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1437,7 +1439,9 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Participants', '15', 'Mute'))
+            .to_raise(StandardError)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Mute'))
             .to_raise(StandardError)
 
         status, failed_participants = client.group_call.mute_participant(UUID, 15)
@@ -1461,7 +1465,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Participants', '15', 'UnMute'))
             .to_return(status: 202, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
@@ -1478,7 +1482,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'UnMute'))
             .to_return(status: 202, body: { 'Success'              => true,
                                             'Message'              => "Operation succeeded",
                                             'ApiId'                => API_ID,
@@ -1502,7 +1506,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Participants', '15', 'UnMute'))
             .to_return(status: 202, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1528,7 +1532,9 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Participants', '15', 'UnMute'))
+            .to_raise(StandardError)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'UnMute'))
             .to_raise(StandardError)
 
         status, failed_participants = client.group_call.unmute_participant(UUID, 15)
@@ -1552,7 +1558,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('GroupCalls', UUID, 'Recordings'))
             .to_return(status: 201, body: { 'Success'   => true,
                                             'Message'   => "Operation succeeded",
                                             'ApiId'     => API_ID,
@@ -1573,7 +1579,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('GroupCalls', UUID, 'Recordings'))
             .to_return(status: 201, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1605,7 +1611,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('GroupCalls', UUID, 'Recordings'))
             .to_raise(StandardError)
 
         status, recording = client.group_call.start_recording(UUID, 'mp3')
@@ -1625,7 +1631,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Recordings', UUID))
             .to_return(status: 201, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
@@ -1642,7 +1648,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Recordings'))
             .to_return(status: 201, body: { 'Success'                => true,
                                             'Message'                => "Operation succeeded",
                                             'ApiId'                  => API_ID,
@@ -1662,7 +1668,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Recordings', UUID))
             .to_return(status: 201, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1691,7 +1697,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('GroupCalls', UUID, 'Recordings', UUID))
             .to_raise(StandardError)
 
         status, affected_recordings = client.group_call.stop_recording(UUID, UUID)
@@ -1711,7 +1717,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Recordings', UUID))
             .to_return(status: 200, body: { 'Success'   => true,
                                             'Message'   => "Operation succeeded",
                                             'ApiId'     => API_ID,
@@ -1732,7 +1738,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Recordings'))
             .to_return(status: 200, body: { 'Success'    => true,
                                             'Message'    => "Operation succeeded",
                                             'ApiId'      => API_ID,
@@ -1757,7 +1763,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Recordings', UUID))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1786,7 +1792,9 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Recordings', UUID))
+            .to_raise(StandardError)
+        stub_request(:get, mock_uri('GroupCalls', UUID, 'Recordings'))
             .to_raise(StandardError)
 
         status, recording = client.group_call.get_recording_details(UUID, UUID)
@@ -1813,7 +1821,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('GroupCalls', UUID, 'Recordings', UUID))
             .to_return(status: 204)
 
         status, = client.group_call.delete_recording(UUID, UUID)
@@ -1827,7 +1835,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('GroupCalls', UUID, 'Recordings'))
             .to_return(status: 204)
 
         status, = client.group_call.delete_recording(UUID, nil)
@@ -1842,7 +1850,7 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('GroupCalls', UUID, 'Recordings', UUID))
             .to_return(status: 204)
 
         assert_raises ArgumentError do
@@ -1869,7 +1877,9 @@ class GroupCallTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('GroupCalls', UUID, 'Recordings', UUID))
+            .to_raise(StandardError)
+        stub_request(:delete, mock_uri('GroupCalls', UUID, 'Recordings'))
             .to_raise(StandardError)
 
         status, = client.group_call.delete_recording(UUID, UUID)

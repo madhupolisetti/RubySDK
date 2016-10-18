@@ -5,7 +5,7 @@
 #
 #-----
 
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../../../test_helper", __FILE__)
 require 'json'
 
 class StatusResponseTest < Minitest::Test
@@ -14,21 +14,31 @@ class StatusResponseTest < Minitest::Test
 
         obj = SmsCountryApi::StatusResponse.new(true, "My message", uuid: "x-y-z")
         refute_nil obj, "No object created."
+        assert_nil obj.status_code, "The status code should be nil."
         assert obj.success, "The success flag should be true."
         assert_equal "My message", obj.message, "The message is incorrect."
         assert_equal "x-y-z", obj.api_uuid, "The API UUID is incorrect."
 
         obj = SmsCountryApi::StatusResponse.new(false)
         refute_nil obj, "No object created."
+        assert_nil obj.status_code, "The status code should be nil."
         refute obj.success, "The success flag should be false."
         assert_nil obj.message, "There should be no message set."
         assert_nil obj.api_uuid, "There should be no API UUID."
 
         obj = SmsCountryApi::StatusResponse.new(true, uuid: "a-b-c")
         refute_nil obj, "No object created."
+        assert_nil obj.status_code, "The status code should be nil."
         assert obj.success, "The success flag should be true."
         assert_nil obj.message, "There should be no message set."
         assert_equal "a-b-c", obj.api_uuid, "The API UUID is incorrect."
+
+        obj = SmsCountryApi::StatusResponse.new(false, status_code: 200)
+        refute_nil obj, "No object created."
+        assert_equal 200, obj.status_code, "The status code should be 200."
+        refute obj.success, "The success flag should be false."
+        assert_nil obj.message, "There should be no message set."
+        assert_nil obj.api_uuid, "There should be no API UUID."
 
         assert_raises ArgumentError do
             obj = SmsCountryApi::StatusResponse.new(true, 5)
@@ -36,6 +46,10 @@ class StatusResponseTest < Minitest::Test
 
         assert_raises ArgumentError do
             obj = SmsCountryApi::StatusResponse.new(true, "My message", uuid: 18)
+        end
+
+        assert_raises ArgumentError do
+            obj = SmsCountryApi::StatusResponse.new(true, "My message", status_code: '')
         end
 
     end
@@ -46,6 +60,7 @@ class StatusResponseTest < Minitest::Test
         obj = SmsCountryApi::StatusResponse.from_hash(h)
         refute_nil obj, "Object wasn't created."
         assert_kind_of SmsCountryApi::StatusResponse, obj, "Object isn't the correct type."
+        assert_nil obj.status_code, "The status code should be nil."
         assert obj.success, "Success flag isn't true."
         assert_equal "My message", obj.message, "Message isn't correct."
         assert_equal "aaa-b-cccc", obj.api_uuid, "API ID isn't correct."
@@ -56,8 +71,29 @@ class StatusResponseTest < Minitest::Test
         obj = SmsCountryApi::StatusResponse.from_hash(h)
         refute_nil obj, "Object wasn't created."
         assert_kind_of SmsCountryApi::StatusResponse, obj, "Object isn't the correct type."
+        assert_nil obj.status_code, "The status code should be nil."
         refute obj.success, "Success flag isn't false."
         assert_equal "StatusResponse#from_hash did not get a hash.", obj.message, "Message isn't correct."
+        assert_equal nil, obj.api_uuid, "API ID isn't correct."
+
+        h   = { 'Success' => true, 'Message' => 'My message', 'ApiId' => 'aaa-b-cccc', 'Extra' => 'Extra data' }
+        obj = SmsCountryApi::StatusResponse.from_hash(h, status_code: 200)
+        refute_nil obj, "Object wasn't created."
+        assert_kind_of SmsCountryApi::StatusResponse, obj, "Object isn't the correct type."
+        assert_equal 200, obj.status_code, "The status code should be 200."
+        assert obj.success, "Success flag isn't true."
+        assert_equal "My message", obj.message, "Message isn't correct."
+        assert_equal "aaa-b-cccc", obj.api_uuid, "API ID isn't correct."
+        assert_equal 1, h.length, "Hash doesn't have the correct number of items remaining."
+        assert_equal "Extra data", h['Extra'], "Extra data item wasn't preserved."
+
+        h   = { 'Success' => true, 'Message' => 'My message', 'ApiId' => 'aaa-b-cccc', 'Extra' => 'Extra data' }
+        obj = SmsCountryApi::StatusResponse.from_hash(h, status_code: '')
+        refute_nil obj, "Object wasn't created."
+        assert_kind_of SmsCountryApi::StatusResponse, obj, "Object isn't the correct type."
+        assert_nil obj.status_code, "The status code should be nil."
+        refute obj.success, "Success flag isn't false."
+        assert_equal "Problem extracting status: Illegal status code type.", obj.message, "Message isn't correct."
         assert_equal nil, obj.api_uuid, "API ID isn't correct."
 
     end
@@ -78,6 +114,7 @@ class StatusResponseTest < Minitest::Test
         obj, hash = SmsCountryApi::StatusResponse.from_response(response_ok)
         refute_nil obj, "Object wasn't created."
         assert_kind_of SmsCountryApi::StatusResponse, obj, "Object isn't the correct type."
+        assert_equal 202, obj.status_code, "The status code should be 202."
         assert obj.success, "Success flag isn't true."
         assert_equal "My message", obj.message, "Message isn't correct."
         assert_equal "aaa-b-cccc", obj.api_uuid, "API ID isn't correct."
@@ -100,6 +137,7 @@ class StatusResponseTest < Minitest::Test
         obj, hash = SmsCountryApi::StatusResponse.from_response(response_bad_code)
         refute_nil obj, "Object wasn't created."
         assert_kind_of SmsCountryApi::StatusResponse, obj, "Object isn't the correct type."
+        assert_equal 404, obj.status_code, "The status code should be 404."
         refute obj.success, "Success flag isn't false."
         assert_equal "HTTP code 404: {\"Success\":false}", obj.message, "Message isn't correct."
         refute_nil hash, "Hash wasn't created."
@@ -120,6 +158,7 @@ class StatusResponseTest < Minitest::Test
         obj, hash = SmsCountryApi::StatusResponse.from_response(response_bad_body)
         refute_nil obj, "Object wasn't created."
         assert_kind_of SmsCountryApi::StatusResponse, obj, "Object isn't the correct type."
+        assert_equal 202, obj.status_code, "The status code should be 202."
         refute obj.success, "Success flag isn't false."
         assert_equal "Unparseable response: Not JSON", obj.message, "Message isn't correct."
         refute_nil hash, "Hash wasn't created."

@@ -265,11 +265,7 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + CALL_PATH + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             values               = { 'Number' => number }
             values['CallerId']   = caller_id unless caller_id.nil?
@@ -281,7 +277,7 @@ module SmsCountryApi
 
             call_uuid = nil
             begin
-                response = RestClient.post url, values, headers
+                response = RestClient.post url, values.to_json, headers
                 if !response.nil?
                     status, result = StatusResponse.from_response(response)
                     call_uuid      = result['CallUUID']
@@ -319,11 +315,7 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + BULK_CALL_PATH + '/'
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             values               = { 'Numbers' => number_list }
             values['CallerId']   = caller_id unless caller_id.nil?
@@ -335,7 +327,7 @@ module SmsCountryApi
 
             call_uuids = nil
             begin
-                response = RestClient.post url, values, headers
+                response = RestClient.post url, values.to_json, headers
                 if !response.nil?
                     status, result = StatusResponse.from_response(response)
                     call_uuids     = result['CallUUIDs']
@@ -363,14 +355,10 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + CALL_PATH + '/' + CGI.escape(call_uuid) + "/"
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             begin
-                response = RestClient.patch url, '', headers
+                response = RestClient.patch url, nil, headers
                 if !response.nil?
                     status, _ = StatusResponse.from_response(response)
                 else
@@ -398,11 +386,7 @@ module SmsCountryApi
             end
 
             url     = @endpoint.url + CALL_PATH + '/' + CGI.escape(call_uuid) + "/"
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             details = nil
             begin
@@ -469,11 +453,7 @@ module SmsCountryApi
                 query_string[0] = '?'
                 url             += query_string
             end
-            headers = {
-                content_type:  'application/json',
-                accept:        'application/json',
-                authorization: @endpoint.authorization
-            }
+            headers = @endpoint.headers
 
             returned_detail_list = nil
             begin

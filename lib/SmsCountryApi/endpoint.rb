@@ -28,7 +28,8 @@ module SmsCountryApi
         # Construct an authentication object for the given key and token.
         #
         # @param [String] key (required) Authentication key.
-        # @param [String] token (required) Authentication token.
+        # @param [String] token (required) Authentication token. A nil value may be used to suppress the
+        #                       normal basic authorization header completely if necessary for a mock server.
         # @param [Boolean] use_ssl `true` to use HTTPS, `false` to use plain HTTP. (default: true)
         # @param [String] host Name of host to use for the service URL. (default: service default)
         # @param [String] path Path prefix to use for the service URL. (default: service default)
@@ -37,7 +38,7 @@ module SmsCountryApi
         #
         def initialize(key, token, use_ssl: true, host: nil, path: nil)
             if key.nil? || !key.kind_of?(String) || key.empty? ||
-                token.nil? || !token.kind_of?(String) || token.empty?
+                (!token.nil? && (!token.kind_of?(String) || token.empty?))
                 raise ArgumentError, "Authentication key and token strings are not valid."
             end
             @key   = key
@@ -82,8 +83,21 @@ module SmsCountryApi
         # @return [String] Base64-encoded authorization header value.
         #
         def authorization
-            Base64.encode64(@key + ':' + @token)
+            @token.nil? ? nil : Base64.encode64(@key + ':' + @token).strip
         end
+
+        # Standard endpoint headers.
+        #
+        # @return [Hash] Hash of standard headers for the endpoint.
+        #
+        def headers
+            hash                 = { content_type: :json, accept: :json }
+            unless self.authorization.nil?
+                hash[:authorization] = 'Basic ' + self.authorization
+            end
+            hash
+        end
+
 
     end
 

@@ -5,7 +5,7 @@
 #
 #-----
 
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../../../test_helper", __FILE__)
 require 'base64'
 require 'webmock/minitest'
 
@@ -28,8 +28,8 @@ class GroupTest < Minitest::Test
 
         hash     = { 'Id'     => 15,
                      'Name'   => 'Joe Average',
-                     'Number' => PHONE_NUMBER }
-        obj      = SmsCountryApi::Group::Member.create(PHONE_NUMBER, id: 15, name: 'Joe Average')
+                     'Number' => PHONE_NUMBER_1 }
+        obj      = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15, name: 'Joe Average')
         new_hash = obj.to_hash
         refute_nil new_hash, "New hash not created."
         new_hash.each do |k, v|
@@ -42,26 +42,26 @@ class GroupTest < Minitest::Test
 
         # Required arguments only
 
-        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER)
+        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Group::Member, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
         assert_nil obj.name, "Name isn't nil."
         assert_nil obj.id, "ID isn't nil."
 
         # Optional arguments
 
-        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER, id: 15)
+        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Group::Member, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
         assert_nil obj.name, "Name isn't nil."
         assert_equal 15, obj.id, "ID doesn't match."
 
-        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER, name: 'Joe Average')
+        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, name: 'Joe Average')
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Group::Member, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
         assert_equal 'Joe Average', obj.name, "Name doesn't match."
         assert_nil obj.id, "ID isn't nil."
 
@@ -80,17 +80,17 @@ class GroupTest < Minitest::Test
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER, id: '')
+            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: '')
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER, id: 15.0)
+            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15.0)
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER, name: '')
+            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, name: '')
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER, name: 15)
+            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, name: 15)
         end
 
     end
@@ -99,7 +99,7 @@ class GroupTest < Minitest::Test
 
         hash = { 'Id'     => 15,
                  'Name'   => 'Joe Average',
-                 'Number' => PHONE_NUMBER }
+                 'Number' => PHONE_NUMBER_1 }
         obj  = SmsCountryApi::Group::Member.from_hash(hash)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Group::Member, obj, "Object isn't the correct type."
@@ -143,10 +143,10 @@ class GroupTest < Minitest::Test
                      'StartGroupCallOnEnter' => '18885554444',
                      'EndGroupCallOnExit'    => '18884445555',
                      'Members'               => [
-                         { 'Number' => PHONE_NUMBER, 'Id' => 15, 'Name' => 'Joe Average' },
+                         { 'Number' => PHONE_NUMBER_1, 'Id' => 15, 'Name' => 'Joe Average' },
                          { 'Number' => '18882229999', 'Id' => 17, 'Name' => 'John Doe' }
                      ] }
-        m1       = SmsCountryApi::Group::Member.create(PHONE_NUMBER, id: 15, name: 'Joe Average')
+        m1       = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15, name: 'Joe Average')
         m2       = SmsCountryApi::Group::Member.create('18882229999', id: 17, name: 'John Doe')
         obj      = SmsCountryApi::Group::GroupDetail.create('Group 1',
                                                             tiny_name:           'g1',
@@ -176,7 +176,7 @@ class GroupTest < Minitest::Test
 
         # Required arguments only
 
-        m1 = SmsCountryApi::Group::Member.create(PHONE_NUMBER, id: 15, name: 'Joe Average')
+        m1 = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15, name: 'Joe Average')
         m2 = SmsCountryApi::Group::Member.create('18882229999', id: 17, name: 'John Doe')
 
         obj = SmsCountryApi::Group::GroupDetail.create('Group 1')
@@ -291,7 +291,7 @@ class GroupTest < Minitest::Test
                  'StartGroupCallOnEnter' => '18885554444',
                  'EndGroupCallOnExit'    => '18884445555',
                  'Members'               => [
-                     { 'Number' => PHONE_NUMBER, 'Id' => 15, 'Name' => 'Joe Average' },
+                     { 'Number' => PHONE_NUMBER_1, 'Id' => 15, 'Name' => 'Joe Average' },
                      { 'Number' => '18882229999', 'Id' => 17, 'Name' => 'John Doe' }
                  ] }
         obj  = SmsCountryApi::Group::GroupDetail.from_hash(hash)
@@ -348,7 +348,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('Groups'))
             .to_return(status: 201, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
@@ -371,6 +371,7 @@ class GroupTest < Minitest::Test
                                                     }
                                                 ]
                                             } }.to_json)
+
         m1                   = SmsCountryApi::Group::Member.create('91XXXXXXXXXX', id: 1567, name: 'someone')
         m2                   = SmsCountryApi::Group::Member.create('91XXXXXXXXXX', id: 1568, name: 'xyzzy')
         status, group_detail = client.group.create_group('group 1',
@@ -397,7 +398,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('Groups'))
             .to_return(status: 201, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -421,8 +422,9 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('Groups'))
             .to_raise(StandardError)
+
         status, group_detail = client.group.create_group('Group 1')
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
@@ -440,7 +442,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups', '1'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
@@ -483,7 +485,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups', '1'))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -503,7 +505,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups', '57'))
             .to_raise(StandardError)
         status, group_detail = client.group.get_group_details(57)
         refute_nil status, "No status object returned."
@@ -559,7 +561,8 @@ class GroupTest < Minitest::Test
                 }
             ] }
         group_list = [g1, g2]
-        stub_request(:get, MOCK_URI)
+
+        stub_request(:get, mock_uri('Groups'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
@@ -618,15 +621,12 @@ class GroupTest < Minitest::Test
                 }
             ] }
 
-        stub_request(:get, MOCK_URI)
-            .to_return(status: 200, body: { 'Success' => false,
-                                            'Message' => "Operation failed",
-                                            'ApiId'   => API_ID }.to_json)
-        stub_request(:get, MOCK_URI).with(query: { 'nameLike' => 'baker' })
+        stub_request(:get, mock_uri('Groups')).with(query: { 'nameLike' => 'baker' })
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
                                             'Groups'  => [g2] }.to_json)
+
         status, details_list = client.group.get_group_collection(name_like: 'baker')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
@@ -637,15 +637,12 @@ class GroupTest < Minitest::Test
 
         WebMock.reset!
 
-        stub_request(:get, MOCK_URI)
-            .to_return(status: 200, body: { 'Success' => false,
-                                            'Message' => "Operation failed",
-                                            'ApiId'   => API_ID }.to_json)
-        stub_request(:get, MOCK_URI).with(query: { 'tinyName' => 'g1' })
+        stub_request(:get, mock_uri('Groups')).with(query: { 'tinyName' => 'g1' })
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
                                             'Groups'  => [g1] }.to_json)
+
         status, details_list = client.group.get_group_collection(tiny_name: 'g1')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
@@ -656,15 +653,12 @@ class GroupTest < Minitest::Test
 
         WebMock.reset!
 
-        stub_request(:get, MOCK_URI)
-            .to_return(status: 200, body: { 'Success' => false,
-                                            'Message' => "Operation failed",
-                                            'ApiId'   => API_ID }.to_json)
-        stub_request(:get, MOCK_URI).with(query: { 'startGroupCallOnEnter' => '91XXXXXXXXXZ' })
+        stub_request(:get, mock_uri('Groups')).with(query: { 'startGroupCallOnEnter' => '91XXXXXXXXXZ' })
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
                                             'Groups'  => [g2] }.to_json)
+
         status, details_list = client.group.get_group_collection(start_call_on_enter: '91XXXXXXXXXZ')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
@@ -675,15 +669,12 @@ class GroupTest < Minitest::Test
 
         WebMock.reset!
 
-        stub_request(:get, MOCK_URI)
-            .to_return(status: 200, body: { 'Success' => false,
-                                            'Message' => "Operation failed",
-                                            'ApiId'   => API_ID }.to_json)
-        stub_request(:get, MOCK_URI).with(query: { 'endGroupCallOnExit' => '91XXXXXXXXXY' })
+        stub_request(:get, mock_uri('Groups')).with(query: { 'endGroupCallOnExit' => '91XXXXXXXXXY' })
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
                                             'Groups'  => [g1] }.to_json)
+
         status, details_list = client.group.get_group_collection(end_call_on_exit: '91XXXXXXXXXY')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
@@ -699,7 +690,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
@@ -718,7 +709,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups'))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -754,8 +745,9 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups'))
             .to_raise(StandardError)
+
         status, group_collection = client.group.get_group_collection
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
@@ -773,10 +765,11 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('Groups', '17'))
             .to_return(status: 202, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
+
         status, = client.group.update_group(17, 'bogus')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
@@ -788,7 +781,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('Groups', '17'))
             .to_return(status: 202, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
@@ -812,7 +805,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('Groups', '17'))
             .to_return(status: 202, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -853,8 +846,9 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('Groups', '17'))
             .to_raise(StandardError)
+
         status, = client.group.update_group(17, 'bogus')
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
@@ -871,7 +865,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('Groups', '17'))
             .to_return(status: 204)
 
         status, = client.group.delete_group(17)
@@ -885,7 +879,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('Groups', '17'))
             .to_return(status: 400)
 
         assert_raises ArgumentError do
@@ -903,8 +897,9 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('Groups', '17'))
             .to_raise(StandardError)
+
         status, = client.group.delete_group(17)
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
@@ -921,7 +916,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('Groups', '17', 'Members'))
             .to_return(status: 201, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
@@ -943,7 +938,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('Groups', '17', 'Members'))
             .to_return(status: 201, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -976,8 +971,9 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:post, MOCK_URI)
+        stub_request(:post, mock_uri('Groups', '17', 'Members'))
             .to_raise(StandardError)
+
         status, member = client.group.add_member_to_group(17, '91XXXXXXXXXX', name: 'someone')
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
@@ -994,7 +990,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups', '17', 'Members'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
@@ -1024,7 +1020,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups', '17', 'Members'))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1044,8 +1040,9 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups', '17', 'Members'))
             .to_raise(StandardError)
+
         status, member_list = client.group.get_members_of_group(17)
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
@@ -1062,7 +1059,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups', '17', 'Members', '15'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
@@ -1085,7 +1082,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups', '17', 'Members', '15'))
             .to_return(status: 200, body: { 'Success' => false,
                                             'Message' => "Operation failed",
                                             'ApiId'   => API_ID }.to_json)
@@ -1111,8 +1108,9 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:get, MOCK_URI)
+        stub_request(:get, mock_uri('Groups', '17', 'Members', '15'))
             .to_raise(StandardError)
+
         status, member = client.group.get_member(17, 15)
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
@@ -1129,7 +1127,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('Groups', '17', 'Members', '5'))
             .to_return(status: 202, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
@@ -1145,7 +1143,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('Groups', '17', 'Members', '5'))
             .to_return(status: 202, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID }.to_json)
@@ -1161,7 +1159,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('Groups', '15', 'Members', '7'))
             .to_return(status: 202, body: { 'Success' => false,
                                             'Message' => "Operation failed" }.to_json)
 
@@ -1200,7 +1198,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:patch, MOCK_URI)
+        stub_request(:patch, mock_uri('Groups', '17', 'Members', '5'))
             .to_raise(StandardError)
 
         status, = client.group.update_member(17, 5, '91XXXXXXXXXX', name: 'nobody')
@@ -1219,7 +1217,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('Groups', '17', 'Members', '5'))
             .to_return(status: 204)
 
         status, = client.group.delete_member_from_group(17, 5)
@@ -1233,7 +1231,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('Groups', '7', 'Members', '7'))
             .to_return(status: 400)
 
         assert_raises ArgumentError do
@@ -1259,7 +1257,7 @@ class GroupTest < Minitest::Test
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
 
-        stub_request(:delete, MOCK_URI)
+        stub_request(:delete, mock_uri('Groups', '17', 'Members', '5'))
             .to_raise(StandardError)
         status, = client.group.delete_member_from_group(17, 5)
         refute_nil status, "No status object returned."

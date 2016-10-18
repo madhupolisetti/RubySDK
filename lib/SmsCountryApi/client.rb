@@ -93,7 +93,7 @@ module SmsCountryApi
             end
         end
         unless path.nil?
-            if !path.kind_of?(String)
+            unless path.kind_of?(String)
                 raise ArgumentError, "Path must be a string."
             end
         end

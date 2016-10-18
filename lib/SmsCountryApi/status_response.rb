@@ -17,6 +17,10 @@ module SmsCountryApi
     #
     class StatusResponse
 
+        # @!attribute [r] status_code
+        #   @return [Integer] HTTP status code
+        attr_reader :status_code
+
         # @!attribute [r] api_uuid
         #   @return [String] API UUID.
         attr_reader :api_uuid
@@ -34,10 +38,11 @@ module SmsCountryApi
         # @param [Boolean] success Success/Failure flag.
         # @param [String] message Message describing the operation's result.
         # @param [String] uuid API UUID.
+        # @param [Integer] status_code HTTP status code.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
-        def initialize(success, message = nil, uuid: nil)
+        def initialize(success, message = nil, uuid: nil, status_code: nil)
             @success = success ? true : false
             if message.nil? || message.kind_of?(String)
                 @message = message
@@ -49,21 +54,29 @@ module SmsCountryApi
             else
                 raise ArgumentError, "Invalid UUID."
             end
+            if status_code.nil? || status_code.kind_of?(Integer)
+                @status_code = status_code
+            else
+                raise ArgumentError, "Illegal status code type."
+            end
         end
 
         # Generate a status object from the contents of an API results hash.
         #
         # @param [Hash] hash Results hash from the SMSCountry API.
+        # @param [Integer] status_code HTTP status code.
         #
         # @return [StatusResponse] New status response object. The original hash will be modified to remove
         #                          the items now carried in the StatusResponse object.
         #
-        def self.from_hash(hash)
+        def self.from_hash(hash, status_code: nil)
             unless hash.kind_of?(Hash)
                 return StatusResponse.new(false, "StatusResponse#from_hash did not get a hash.")
             end
             begin
-                status = StatusResponse.new(hash['Success'], CGI.unescape(hash['Message'].to_s), uuid: hash['ApiId'].to_s)
+                status = StatusResponse.new(hash['Success'], CGI.unescape(hash['Message'].to_s),
+                                            uuid:        hash['ApiId'].to_s,
+                                            status_code: status_code)
                 hash.delete_if { |k, _| k == 'Success' || k == 'Message' || k == 'ApiId' }
             rescue ArgumentError => e
                 status = StatusResponse.new(false, "Problem extracting status: " + e.to_s)
@@ -87,14 +100,16 @@ module SmsCountryApi
                     result = nil
                 end
                 if result.kind_of?(Hash)
-                    status = self.from_hash(result)
+                    status = self.from_hash(result, status_code: response.code)
                 else
                     result = {}
-                    status = StatusResponse.new(false, "Unparseable response: " + response.body)
+                    status = StatusResponse.new(false, "Unparseable response: " + response.body,
+                                                status_code: response.code)
                 end
             else
                 result = {}
-                status = StatusResponse.new(false, "HTTP code " + response.code.to_s + ": " + response.body)
+                status = StatusResponse.new(false, "HTTP code " + response.code.to_s + ": " + response.body,
+                                            status_code: response.code)
             end
             return status, result
         end

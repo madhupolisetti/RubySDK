@@ -5,7 +5,7 @@
 #
 #-----
 
-require File.expand_path("../../test_helper", __FILE__)
+require File.expand_path("../../../test_helper", __FILE__)
 require 'base64'
 
 class EndpointTest < Minitest::Test
@@ -22,6 +22,15 @@ class EndpointTest < Minitest::Test
         assert_equal "abcdefghijkl:xyzzy", Base64::decode64(obj.authorization),
                      "Authorization string is incorrect."
 
+        # Standard valid authentication key and nil token
+        obj = SmsCountryApi::Endpoint.new("abcdefghijkl", nil)
+        refute_nil obj, "Endpoint was not successfully created."
+        assert_equal "abcdefghijkl", obj.key, "Authentication key is incorrect."
+        assert_nil obj.token, "Authentication token is incorrect."
+        assert_equal "https://restapi.smscountry.com/v0.1/Accounts/abcdefghijkl/", obj.url,
+                     "Default endpoint URL is incorrect."
+        assert_nil obj.authorization, "Authorization string is incorrect."
+
         # Various invalid authentication keys and tokens
         assert_raises ArgumentError do
             obj = SmsCountryApi::Endpoint.new(nil, "xyzzy")
@@ -31,9 +40,6 @@ class EndpointTest < Minitest::Test
         end
         assert_raises ArgumentError do
             obj = SmsCountryApi::Endpoint.new(5, "xyzzy")
-        end
-        assert_raises ArgumentError do
-            obj = SmsCountryApi::Endpoint.new("abcdefghijkl", nil)
         end
         assert_raises ArgumentError do
             obj = SmsCountryApi::Endpoint.new("abcdefghijkl", '')
