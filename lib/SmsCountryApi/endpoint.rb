@@ -91,7 +91,7 @@ module SmsCountryApi
         # @return [Hash] Hash of standard headers for the endpoint.
         #
         def headers
-            hash                 = { content_type: :json, accept: :json }
+            hash = { content_type: :json, accept: :json }
             unless self.authorization.nil?
                 hash[:authorization] = 'Basic ' + self.authorization
             end

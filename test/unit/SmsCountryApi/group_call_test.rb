@@ -100,7 +100,7 @@ class GroupCallTest < Minitest::Test
 
         t          = Time.now
         call1_hash = { 'CallUUID'      => UUID,
-                       'Number'        => PHONE_NUMBER_1,
+                       'Number'        => PHONE_NUMBERS[0],
                        'CallerId'      => 'SMSCountry',
                        'Status'        => 'completed',
                        'RingTime'      => t.to_i.to_s,
@@ -166,7 +166,7 @@ class GroupCallTest < Minitest::Test
 
         t          = Time.now
         call1_hash = { 'CallUUID'      => UUID,
-                       'Number'        => PHONE_NUMBER_1,
+                       'Number'        => PHONE_NUMBERS[0],
                        'CallerId'      => 'SMSCountry',
                        'Status'        => 'completed',
                        'RingTime'      => t.to_i.to_s,
@@ -211,15 +211,15 @@ class GroupCallTest < Minitest::Test
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBER_1, name: 754)
+            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBERS[0], name: 754)
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBER_1, id: '')
+            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBERS[0], id: '')
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBER_1, calls: '')
+            obj = SmsCountryApi::GroupCall::Participant.create(PHONE_NUMBERS[0], calls: '')
         end
 
     end
@@ -228,7 +228,7 @@ class GroupCallTest < Minitest::Test
 
         t          = Time.now
         call1_hash = { 'CallUUID'      => UUID,
-                       'Number'        => PHONE_NUMBER_1,
+                       'Number'        => PHONE_NUMBERS[0],
                        'CallerId'      => 'SMSCountry',
                        'Status'        => 'completed',
                        'RingTime'      => t.to_i.to_s,
@@ -293,7 +293,7 @@ class GroupCallTest < Minitest::Test
 
         t                 = Time.now
         call1_hash        = { 'CallUUID'      => UUID,
-                              'Number'        => PHONE_NUMBER_1,
+                              'Number'        => PHONE_NUMBERS[0],
                               'CallerId'      => 'SMSCountry',
                               'Status'        => 'completed',
                               'RingTime'      => t.to_i.to_s,
@@ -367,7 +367,7 @@ class GroupCallTest < Minitest::Test
 
         t                 = Time.now
         call1_hash        = { 'CallUUID'      => UUID,
-                              'Number'        => PHONE_NUMBER_1,
+                              'Number'        => PHONE_NUMBERS[0],
                               'CallerId'      => 'SMSCountry',
                               'Status'        => 'completed',
                               'RingTime'      => t.to_i.to_s,
@@ -463,7 +463,7 @@ class GroupCallTest < Minitest::Test
 
         t                 = Time.now
         call1_hash        = { 'CallUUID'      => UUID,
-                              'Number'        => PHONE_NUMBER_1,
+                              'Number'        => PHONE_NUMBERS[0],
                               'CallerId'      => 'SMSCountry',
                               'Status'        => 'completed',
                               'RingTime'      => t.to_i.to_s,
@@ -1016,7 +1016,7 @@ class GroupCallTest < Minitest::Test
                                             'ApiId'       => API_ID,
                                             'Participant' => { 'Id'     => 15,
                                                                'Name'   => 'somebody',
-                                                               'Number' => PHONE_NUMBER_1 } }.to_json)
+                                                               'Number' => PHONE_NUMBERS[0] } }.to_json)
 
         status, participant = client.group_call.get_participant(UUID, 15)
         refute_nil status, "No status object returned."
@@ -1024,7 +1024,7 @@ class GroupCallTest < Minitest::Test
         refute_nil participant, "No participant returned."
         assert_equal 15, participant.id, "ID doesn't match."
         assert_equal 'somebody', participant.name, "Name doesn't match."
-        assert_equal PHONE_NUMBER_1, participant.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], participant.number, "Number doesn't match."
 
     end
 
@@ -1088,7 +1088,7 @@ class GroupCallTest < Minitest::Test
                                             'ApiId'        => API_ID,
                                             'Participants' => [{ 'Id'     => 15,
                                                                  'Name'   => 'somebody',
-                                                                 'Number' => PHONE_NUMBER_1 },
+                                                                 'Number' => PHONE_NUMBERS[0] },
                                                                { 'Id'     => 29,
                                                                  'Name'   => 'nobody',
                                                                  'Number' => "91XXXXXXYYYY" }] }.to_json)
@@ -1100,7 +1100,7 @@ class GroupCallTest < Minitest::Test
         assert_equal 2, participants.length, "Participant list length isn't correct."
         assert_equal 15, participants[0].id, "Participant 1 ID doesn't match."
         assert_equal 'somebody', participants[0].name, "Participant 1 name doesn't match."
-        assert_equal PHONE_NUMBER_1, participants[0].number, "Participant 1 number doesn't match."
+        assert_equal PHONE_NUMBERS[0], participants[0].number, "Participant 1 number doesn't match."
         assert_equal 29, participants[1].id, "Participant 2 ID doesn't match."
         assert_equal 'nobody', participants[1].name, "Participant 2 name doesn't match."
         assert_equal '91XXXXXXYYYY', participants[1].number, "Participant 2 number doesn't match."

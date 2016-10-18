@@ -28,8 +28,8 @@ class GroupTest < Minitest::Test
 
         hash     = { 'Id'     => 15,
                      'Name'   => 'Joe Average',
-                     'Number' => PHONE_NUMBER_1 }
-        obj      = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15, name: 'Joe Average')
+                     'Number' => PHONE_NUMBERS[0] }
+        obj      = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0], id: 15, name: 'Joe Average')
         new_hash = obj.to_hash
         refute_nil new_hash, "New hash not created."
         new_hash.each do |k, v|
@@ -42,26 +42,26 @@ class GroupTest < Minitest::Test
 
         # Required arguments only
 
-        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1)
+        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0])
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Group::Member, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_nil obj.name, "Name isn't nil."
         assert_nil obj.id, "ID isn't nil."
 
         # Optional arguments
 
-        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15)
+        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0], id: 15)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Group::Member, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_nil obj.name, "Name isn't nil."
         assert_equal 15, obj.id, "ID doesn't match."
 
-        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, name: 'Joe Average')
+        obj = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0], name: 'Joe Average')
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Group::Member, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal 'Joe Average', obj.name, "Name doesn't match."
         assert_nil obj.id, "ID isn't nil."
 
@@ -80,17 +80,17 @@ class GroupTest < Minitest::Test
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: '')
+            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0], id: '')
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15.0)
+            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0], id: 15.0)
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, name: '')
+            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0], name: '')
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, name: 15)
+            obj = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0], name: 15)
         end
 
     end
@@ -99,7 +99,7 @@ class GroupTest < Minitest::Test
 
         hash = { 'Id'     => 15,
                  'Name'   => 'Joe Average',
-                 'Number' => PHONE_NUMBER_1 }
+                 'Number' => PHONE_NUMBERS[0] }
         obj  = SmsCountryApi::Group::Member.from_hash(hash)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Group::Member, obj, "Object isn't the correct type."
@@ -143,10 +143,10 @@ class GroupTest < Minitest::Test
                      'StartGroupCallOnEnter' => '18885554444',
                      'EndGroupCallOnExit'    => '18884445555',
                      'Members'               => [
-                         { 'Number' => PHONE_NUMBER_1, 'Id' => 15, 'Name' => 'Joe Average' },
+                         { 'Number' => PHONE_NUMBERS[0], 'Id' => 15, 'Name' => 'Joe Average' },
                          { 'Number' => '18882229999', 'Id' => 17, 'Name' => 'John Doe' }
                      ] }
-        m1       = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15, name: 'Joe Average')
+        m1       = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0], id: 15, name: 'Joe Average')
         m2       = SmsCountryApi::Group::Member.create('18882229999', id: 17, name: 'John Doe')
         obj      = SmsCountryApi::Group::GroupDetail.create('Group 1',
                                                             tiny_name:           'g1',
@@ -176,7 +176,7 @@ class GroupTest < Minitest::Test
 
         # Required arguments only
 
-        m1 = SmsCountryApi::Group::Member.create(PHONE_NUMBER_1, id: 15, name: 'Joe Average')
+        m1 = SmsCountryApi::Group::Member.create(PHONE_NUMBERS[0], id: 15, name: 'Joe Average')
         m2 = SmsCountryApi::Group::Member.create('18882229999', id: 17, name: 'John Doe')
 
         obj = SmsCountryApi::Group::GroupDetail.create('Group 1')
@@ -291,7 +291,7 @@ class GroupTest < Minitest::Test
                  'StartGroupCallOnEnter' => '18885554444',
                  'EndGroupCallOnExit'    => '18884445555',
                  'Members'               => [
-                     { 'Number' => PHONE_NUMBER_1, 'Id' => 15, 'Name' => 'Joe Average' },
+                     { 'Number' => PHONE_NUMBERS[0], 'Id' => 15, 'Name' => 'Joe Average' },
                      { 'Number' => '18882229999', 'Id' => 17, 'Name' => 'John Doe' }
                  ] }
         obj  = SmsCountryApi::Group::GroupDetail.from_hash(hash)

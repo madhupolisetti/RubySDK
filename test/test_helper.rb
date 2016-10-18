@@ -10,21 +10,20 @@ require 'SmsCountryApi'
 
 require 'minitest/autorun'
 
-# Invalid phone number for use in testing.
-PHONE_NUMBER_1 = '19909589191'
-PHONE_NUMBER_2 = '19909580256'
+# Invalid phone numbers for use in testing.
+PHONE_NUMBERS = %w(19909589191 19909580256 19909586302)
 
 # API UUID for use in testing.
-API_ID         = '123e4567-e89b-12d3-a456-426655440000'
+API_ID        = '123e4567-e89b-12d3-a456-426655440000'
 
 # Bogus UUID for use in testing.
-UUID           = '123e4567-e89b-12d3-a456-426655440011'
+UUID          = '123e4567-e89b-12d3-a456-426655440011'
 
 # Base string for mock URI.
-MOCK_URI_BASE  = 'http://localhost/api/jYyz0aHhTnpCnZg852Kx/'
+MOCK_URI_BASE = 'http://localhost/api/jYyz0aHhTnpCnZg852Kx/'
 
-# Generic mock URI regexp
-MOCK_URI       = %r|http://localhost/api/jYyz0aHhTnpCnZg852Kx/.*|
+# Notification URL
+NOTIFY_URL    = 'http://localhost/notification/'
 
 # Create and return a mock URI regexp based on parameters.
 #

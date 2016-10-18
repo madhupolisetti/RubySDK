@@ -329,6 +329,7 @@ module SmsCountryApi
         # @return [Array({StatusResponse}, {SmsDetails})]
         #   - Status of the operation.
         #   - Array of detail objects of the SMS messages matching the criteria.
+        #   - TODO Next offset/limit returned from server?
         #
         # @raise [ArgumentError] An argument is invalid.
         #

@@ -38,7 +38,7 @@ class CallTest < Minitest::Test
 
         t        = Time.now
         hash     = { 'CallUUID'      => UUID,
-                     'Number'        => PHONE_NUMBER_1,
+                     'Number'        => PHONE_NUMBERS[0],
                      'CallerId'      => 'SMSCountry',
                      'Status'        => 'completed',
                      'RingTime'      => t.to_i.to_s,
@@ -50,7 +50,7 @@ class CallTest < Minitest::Test
                      'Pulse'         => '30',
                      'Pulses'        => '1',
                      'PricePerPulse' => '0.7' }
-        obj      = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID,
+        obj      = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID,
                                                            caller_id:       "SMSCountry",
                                                            status:          'completed',
                                                            ring_time:       t,
@@ -74,10 +74,10 @@ class CallTest < Minitest::Test
 
         # Required arguments only
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID)
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -94,10 +94,10 @@ class CallTest < Minitest::Test
         # Optional arguments
         t = Time.now
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, caller_id: 'test')
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, caller_id: 'test')
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_equal 'test', obj.caller_id, "Caller ID doesn't match."
         assert_nil obj.status, "Status isn't nil."
@@ -111,10 +111,10 @@ class CallTest < Minitest::Test
         assert_nil obj.pulses, "Pulses isn't nil."
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, status: 'test')
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, status: 'test')
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_equal 'test', obj.status, "Status doesn't match."
@@ -128,10 +128,10 @@ class CallTest < Minitest::Test
         assert_nil obj.pulses, "Pulses isn't nil."
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, ring_time: t)
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, ring_time: t)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -146,10 +146,10 @@ class CallTest < Minitest::Test
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
         t   = Time.now
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, answer_time: t)
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, answer_time: t)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -163,10 +163,10 @@ class CallTest < Minitest::Test
         assert_nil obj.pulses, "Pulses isn't nil."
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, end_time: t)
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, end_time: t)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -180,10 +180,10 @@ class CallTest < Minitest::Test
         assert_nil obj.pulses, "Pulses isn't nil."
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, end_reason: 'test')
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, end_reason: 'test')
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -197,10 +197,10 @@ class CallTest < Minitest::Test
         assert_nil obj.pulses, "Pulses isn't nil."
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, cost: 'test')
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, cost: 'test')
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -214,10 +214,10 @@ class CallTest < Minitest::Test
         assert_nil obj.pulses, "Pulses isn't nil."
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, direction: 'test')
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, direction: 'test')
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -231,10 +231,10 @@ class CallTest < Minitest::Test
         assert_nil obj.pulses, "Pulses isn't nil."
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, pulse: 5)
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, pulse: 5)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -248,10 +248,10 @@ class CallTest < Minitest::Test
         assert_nil obj.pulses, "Pulses isn't nil."
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, pulses: 5)
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, pulses: 5)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -265,10 +265,10 @@ class CallTest < Minitest::Test
         assert_equal 5, obj.pulses, "Pulses doesn't match."
         assert_nil obj.price_per_pulse, "Price per pulse isn't nil."
 
-        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, price_per_pulse: 5.0)
+        obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, price_per_pulse: 5.0)
         refute_nil obj, "Object wasn't created successfully."
         assert_kind_of SmsCountryApi::Call::CallDetails, obj, "Object isn't the correct type."
-        assert_equal PHONE_NUMBER_1, obj.number, "Number doesn't match."
+        assert_equal PHONE_NUMBERS[0], obj.number, "Number doesn't match."
         assert_equal UUID, obj.call_uuid, "Call UUID doesn't match."
         assert_nil obj.caller_id, "Caller ID isn't nil."
         assert_nil obj.status, "Status isn't nil."
@@ -287,13 +287,13 @@ class CallTest < Minitest::Test
     def test_calldetails_create_bad_args
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, nil)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], nil)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, '')
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], '')
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], 754)
         end
 
         assert_raises ArgumentError do
@@ -307,37 +307,37 @@ class CallTest < Minitest::Test
         end
 
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, caller_id: 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, caller_id: 754)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, status: 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, status: 754)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, ring_time: 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, ring_time: 754)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, answer_time: 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, answer_time: 754)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, end_time: 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, end_time: 754)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, end_reason: 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, end_reason: 754)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, cost: 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, cost: 754)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, direction: 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, direction: 754)
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, pulse: '5')
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, pulse: '5')
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, pulses: '5')
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, pulses: '5')
         end
         assert_raises ArgumentError do
-            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBER_1, UUID, price_per_pulse: 754)
+            obj = SmsCountryApi::Call::CallDetails.create(PHONE_NUMBERS[0], UUID, price_per_pulse: 754)
         end
 
     end
@@ -346,7 +346,7 @@ class CallTest < Minitest::Test
 
         t    = Time.now
         hash = { 'CallUUID'      => UUID,
-                 'Number'        => PHONE_NUMBER_1,
+                 'Number'        => PHONE_NUMBERS[0],
                  'CallerId'      => 'SMSCountry',
                  'Status'        => 'completed',
                  'RingTime'      => t.to_i.to_s,
@@ -421,7 +421,7 @@ class CallTest < Minitest::Test
                                             'ApiId'    => API_ID,
                                             'CallUUID' => UUID }.to_json)
 
-        status, call_uuid = client.call.initiate_call(PHONE_NUMBER_1)
+        status, call_uuid = client.call.initiate_call(PHONE_NUMBERS[0])
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil call_uuid, "No call UUID returned."
@@ -461,7 +461,7 @@ class CallTest < Minitest::Test
         stub_request(:post, mock_uri('Calls'))
             .to_raise(StandardError)
 
-        status, call_uuid = client.call.initiate_call(PHONE_NUMBER_1)
+        status, call_uuid = client.call.initiate_call(PHONE_NUMBERS[0])
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "Exception from WebMock", status.message, "Unexpected error message encountered."
@@ -485,7 +485,7 @@ class CallTest < Minitest::Test
                                             'BatchUUID' => UUID,
                                             'CallUUIDs' => [UUID] }.to_json)
 
-        status, call_uuids = client.call.initiate_bulk_call([PHONE_NUMBER_1])
+        status, call_uuids = client.call.initiate_bulk_call([PHONE_NUMBERS[0]])
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         assert_equal 1, call_uuids.length, "call UUID list is not the correct length."
@@ -525,7 +525,7 @@ class CallTest < Minitest::Test
         stub_request(:post, mock_uri('BulkCalls'))
             .to_raise(StandardError)
 
-        status, call_uuids = client.call.initiate_bulk_call([PHONE_NUMBER_1])
+        status, call_uuids = client.call.initiate_bulk_call([PHONE_NUMBERS[0]])
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "Exception from WebMock", status.message, "Unexpected error message encountered."
@@ -601,7 +601,7 @@ class CallTest < Minitest::Test
         refute_nil client, "Client object couldn't be created."
 
         call_details_hash = { 'CallUUID'      => UUID,
-                              'Number'        => PHONE_NUMBER_1,
+                              'Number'        => PHONE_NUMBERS[0],
                               'CallerId'      => 'SMSCountry',
                               'Status'        => 'completed',
                               'RingTime'      => Time.now.to_i.to_s,
@@ -706,7 +706,7 @@ class CallTest < Minitest::Test
 
         call_details_list = []
         call_detail_hash  = { 'CallUUID'      => UUID,
-                              'Number'        => PHONE_NUMBER_1,
+                              'Number'        => PHONE_NUMBERS[0],
                               'CallerId'      => 'SMSCountry',
                               'Status'        => 'completed',
                               'RingTime'      => Time.now.to_i.to_s,
@@ -720,7 +720,7 @@ class CallTest < Minitest::Test
                               'PricePerPulse' => '0.7' }
         call_details_list.push call_detail_hash
         call_detail_hash = { 'CallUUID'      => UUID,
-                             'Number'        => PHONE_NUMBER_1,
+                             'Number'        => PHONE_NUMBERS[0],
                              'CallerId'      => 'SMSCountry',
                              'Status'        => 'completed',
                              'RingTime'      => Time.now.to_i.to_s,
@@ -758,7 +758,7 @@ class CallTest < Minitest::Test
 
         call_details_list = []
         call_detail_hash  = { 'CallUUID'      => UUID,
-                              'Number'        => PHONE_NUMBER_1,
+                              'Number'        => PHONE_NUMBERS[0],
                               'CallerId'      => 'SMSCountry',
                               'Status'        => 'completed',
                               'RingTime'      => Time.now.to_i.to_s,
@@ -772,7 +772,7 @@ class CallTest < Minitest::Test
                               'PricePerPulse' => '0.7' }
         call_details_list.push call_detail_hash
         call_detail_hash = { 'CallUUID'      => UUID,
-                             'Number'        => PHONE_NUMBER_1,
+                             'Number'        => PHONE_NUMBERS[0],
                              'CallerId'      => 'SMSCountry',
                              'Status'        => 'completed',
                              'RingTime'      => Time.now.to_i.to_s,
