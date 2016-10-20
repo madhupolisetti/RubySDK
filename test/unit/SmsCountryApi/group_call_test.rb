@@ -835,7 +835,7 @@ class GroupCallTest < Minitest::Test
                                                                'StartGroupCallOnEnter' => 'enter',
                                                                'EndGroupCallOnExit'    => 'exit' }] }.to_json)
 
-        status, detail_list = client.group_call.get_group_call_collection
+        status, detail_list, _, _ = client.group_call.get_group_call_collection
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil detail_list, "No group call detail list returned."
@@ -867,7 +867,7 @@ class GroupCallTest < Minitest::Test
                                                                'StartGroupCallOnEnter' => 'enter',
                                                                'EndGroupCallOnExit'    => 'exit' }] }.to_json)
 
-        status, detail_list = client.group_call.get_group_call_collection(from: Time.new(2016, 9, 15, 0, 0, 0))
+        status, detail_list, _, _ = client.group_call.get_group_call_collection(from: Time.new(2016, 9, 15, 0, 0, 0))
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil detail_list, "No group call detail list returned."
@@ -894,7 +894,7 @@ class GroupCallTest < Minitest::Test
                                                                'StartGroupCallOnEnter' => 'enter',
                                                                'EndGroupCallOnExit'    => 'exit' }] }.to_json)
 
-        status, detail_list = client.group_call.get_group_call_collection(to: Time.new(2016, 9, 15, 0, 0, 0))
+        status, detail_list, _, _ = client.group_call.get_group_call_collection(to: Time.new(2016, 9, 15, 0, 0, 0))
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil detail_list, "No group call detail list returned."
@@ -921,7 +921,7 @@ class GroupCallTest < Minitest::Test
                                                                'StartGroupCallOnEnter' => 'enter',
                                                                'EndGroupCallOnExit'    => 'exit' }] }.to_json)
 
-        status, detail_list = client.group_call.get_group_call_collection(offset: 5)
+        status, detail_list, _, _ = client.group_call.get_group_call_collection(offset: 5)
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil detail_list, "No group call detail list returned."
@@ -948,13 +948,171 @@ class GroupCallTest < Minitest::Test
                                                                'StartGroupCallOnEnter' => 'enter',
                                                                'EndGroupCallOnExit'    => 'exit' }] }.to_json)
 
-        status, detail_list = client.group_call.get_group_call_collection(limit: 8)
+        status, detail_list, _, _ = client.group_call.get_group_call_collection(limit: 8)
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil detail_list, "No group call detail list returned."
         assert_equal 2, detail_list.length, "Group call detail list length incorrect."
         assert_equal UUID, detail_list[0].uuid, "Group call 1 UUID doesn't match."
         assert_equal 'xxx-y-zzzz', detail_list[1].uuid, "Group call 2 UUID doesn't match."
+
+    end
+
+    def test_get_group_call_collection_next_values
+
+        client = create_mock_client
+        refute_nil client, "Client object couldn't be created."
+
+        stub_request(:get, mock_uri('GroupCalls'))
+            .to_return(status: 200, body: { 'Success'    => true,
+                                            'Message'    => "Operation succeeded",
+                                            'ApiId'      => API_ID,
+                                            'GroupCalls' => [{ 'GroupCallUUID'         => UUID,
+                                                               'Name'                  => 'group call 1',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' },
+                                                             { 'GroupCallUUID'         => 'xxx-y-zzzz',
+                                                               'Name'                  => 'group call 2',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' }],
+                                            'Next'       => '/GroupCalls/?Offset=52&Limit=27' }.to_json)
+
+        status, detail_list, next_offset, next_limit = client.group_call.get_group_call_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil detail_list, "No group call detail list returned."
+        assert_equal 2, detail_list.length, "Group call detail list length incorrect."
+        assert_equal UUID, detail_list[0].uuid, "Group call 1 UUID doesn't match."
+        assert_equal 'xxx-y-zzzz', detail_list[1].uuid, "Group call 2 UUID doesn't match."
+        refute_nil next_offset, "Next offset wasn't present."
+        assert_equal 52, next_offset, "Next offset value wasn't correct."
+        refute_nil next_limit, "Next limit wasn't present."
+        assert_equal 27, next_limit, "Next limit value wasn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('GroupCalls'))
+            .to_return(status: 200, body: { 'Success'    => true,
+                                            'Message'    => "Operation succeeded",
+                                            'ApiId'      => API_ID,
+                                            'GroupCalls' => [{ 'GroupCallUUID'         => UUID,
+                                                               'Name'                  => 'group call 1',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' },
+                                                             { 'GroupCallUUID'         => 'xxx-y-zzzz',
+                                                               'Name'                  => 'group call 2',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' }],
+                                            'Next'       => '/GroupCalls/?Limit=27' }.to_json)
+
+        status, detail_list, next_offset, next_limit = client.group_call.get_group_call_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil detail_list, "No group call detail list returned."
+        assert_equal 2, detail_list.length, "Group call detail list length incorrect."
+        assert_equal UUID, detail_list[0].uuid, "Group call 1 UUID doesn't match."
+        assert_equal 'xxx-y-zzzz', detail_list[1].uuid, "Group call 2 UUID doesn't match."
+        assert_nil next_offset, "Next offset wasn't nil."
+        refute_nil next_limit, "Next limit wasn't present."
+        assert_equal 27, next_limit, "Next limit value wasn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('GroupCalls'))
+            .to_return(status: 200, body: { 'Success'    => true,
+                                            'Message'    => "Operation succeeded",
+                                            'ApiId'      => API_ID,
+                                            'GroupCalls' => [{ 'GroupCallUUID'         => UUID,
+                                                               'Name'                  => 'group call 1',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' },
+                                                             { 'GroupCallUUID'         => 'xxx-y-zzzz',
+                                                               'Name'                  => 'group call 2',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' }],
+                                            'Next'       => '/GroupCalls/?Offset=52' }.to_json)
+
+        status, detail_list, next_offset, next_limit = client.group_call.get_group_call_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil detail_list, "No group call detail list returned."
+        assert_equal 2, detail_list.length, "Group call detail list length incorrect."
+        assert_equal UUID, detail_list[0].uuid, "Group call 1 UUID doesn't match."
+        assert_equal 'xxx-y-zzzz', detail_list[1].uuid, "Group call 2 UUID doesn't match."
+        refute_nil next_offset, "Next offset wasn't present."
+        assert_equal 52, next_offset, "Next offset value wasn't correct."
+        assert_nil next_limit, "Next limit wasn't nil."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('GroupCalls'))
+            .to_return(status: 200, body: { 'Success'    => true,
+                                            'Message'    => "Operation succeeded",
+                                            'ApiId'      => API_ID,
+                                            'GroupCalls' => [{ 'GroupCallUUID'         => UUID,
+                                                               'Name'                  => 'group call 1',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' },
+                                                             { 'GroupCallUUID'         => 'xxx-y-zzzz',
+                                                               'Name'                  => 'group call 2',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' }],
+                                            'Next'       => '' }.to_json)
+
+        status, detail_list, next_offset, next_limit = client.group_call.get_group_call_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil detail_list, "No group call detail list returned."
+        assert_equal 2, detail_list.length, "Group call detail list length incorrect."
+        assert_equal UUID, detail_list[0].uuid, "Group call 1 UUID doesn't match."
+        assert_equal 'xxx-y-zzzz', detail_list[1].uuid, "Group call 2 UUID doesn't match."
+        assert_nil next_offset, "Next offset wasn't nil."
+        assert_nil next_limit, "Next limit wasn't nil."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('GroupCalls'))
+            .to_return(status: 200, body: { 'Success'    => true,
+                                            'Message'    => "Operation succeeded",
+                                            'ApiId'      => API_ID,
+                                            'GroupCalls' => [{ 'GroupCallUUID'         => UUID,
+                                                               'Name'                  => 'group call 1',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' },
+                                                             { 'GroupCallUUID'         => 'xxx-y-zzzz',
+                                                               'Name'                  => 'group call 2',
+                                                               'WelcomeSound'          => 'welcome',
+                                                               'WaitSound'             => 'wait',
+                                                               'StartGroupCallOnEnter' => 'enter',
+                                                               'EndGroupCallOnExit'    => 'exit' }] }.to_json)
+
+        status, detail_list, next_offset, next_limit = client.group_call.get_group_call_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil detail_list, "No group call detail list returned."
+        assert_equal 2, detail_list.length, "Group call detail list length incorrect."
+        assert_equal UUID, detail_list[0].uuid, "Group call 1 UUID doesn't match."
+        assert_equal 'xxx-y-zzzz', detail_list[1].uuid, "Group call 2 UUID doesn't match."
+        assert_nil next_offset, "Next offset wasn't nil."
+        assert_nil next_limit, "Next limit wasn't nil."
 
     end
 
@@ -969,18 +1127,18 @@ class GroupCallTest < Minitest::Test
                                             'ApiId'   => API_ID }.to_json)
 
         assert_raises ArgumentError do
-            status, detail_list = client.group_call.get_group_call_collection(from: '')
+            status, detail_list, _, _ = client.group_call.get_group_call_collection(from: '')
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.group_call.get_group_call_collection(to: '')
+            status, detail_list, _, _ = client.group_call.get_group_call_collection(to: '')
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.group_call.get_group_call_collection(offset: '')
+            status, detail_list, _, _ = client.group_call.get_group_call_collection(offset: '')
         end
         assert_raises ArgumentError do
-            status, detail_list = client.group_call.get_group_call_collection(limit: '')
+            status, detail_list, _, _ = client.group_call.get_group_call_collection(limit: '')
         end
 
     end
@@ -993,7 +1151,7 @@ class GroupCallTest < Minitest::Test
         stub_request(:get, mock_uri('GroupCalls'))
             .to_raise(StandardError)
 
-        status, detail_list = client.group_call.get_group_call_collection
+        status, detail_list, _, _ = client.group_call.get_group_call_collection
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "Exception from WebMock", status.message, "Unexpected error message encountered."

@@ -740,7 +740,7 @@ class CallTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'Calls'   => call_details_list }.to_json)
 
-        status, details_list = client.call.get_collection
+        status, details_list, _, _ = client.call.get_collection
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of call detail objects returned."
@@ -752,6 +752,126 @@ class CallTest < Minitest::Test
     end
 
     def test_get_collection_filters
+
+        client = create_mock_client
+        refute_nil client, "Client object couldn't be created."
+
+        call_details_list = []
+        call_detail_hash        = { 'CallUUID'      => UUID,
+                                    'Number'        => PHONE_NUMBERS[0],
+                                    'CallerId'      => 'SMSCountry',
+                                    'Status'        => 'completed',
+                                    'RingTime'      => Time.now.to_i.to_s,
+                                    'AnswerTime'    => Time.now.to_i.to_s,
+                                    'EndTime'       => Time.now.to_i.to_s,
+                                    'EndReason'     => 'NORMAL',
+                                    'Cost'          => "1.25 USD",
+                                    'Direction'     => 'Outbound',
+                                    'Pulse'         => '30',
+                                    'Pulses'        => '1',
+                                    'PricePerPulse' => '0.7' }
+        call_details_list.push call_detail_hash
+        call_detail_hash = { 'CallUUID'      => UUID,
+                             'Number'        => PHONE_NUMBERS[0],
+                             'CallerId'      => 'SMSCountry',
+                             'Status'        => 'completed',
+                             'RingTime'      => Time.now.to_i.to_s,
+                             'AnswerTime'    => Time.now.to_i.to_s,
+                             'EndTime'       => Time.now.to_i.to_s,
+                             'EndReason'     => 'HANGUP',
+                             'Cost'          => "1.25 USD",
+                             'Direction'     => 'Outbound',
+                             'Pulse'         => '30',
+                             'Pulses'        => '1',
+                             'PricePerPulse' => '0.7' }
+        call_details_list.push call_detail_hash
+
+        stub_request(:get, mock_uri('Calls')).with(query: { 'FromDate' => '2016-09-15 00:00:00' })
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Calls'   => call_details_list }.to_json)
+
+        status, details_list, _, _ = client.call.get_collection(from: Time.new(2016, 9, 15, 0, 0, 0))
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of call detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
+        assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('Calls')).with(query: { 'ToDate' => '2016-09-15 00:00:00' })
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Calls'   => call_details_list }.to_json)
+
+        status, details_list, _, _ = client.call.get_collection(to: Time.new(2016, 9, 15, 0, 0, 0))
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of call detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
+        assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('Calls')).with(query: { 'CallerId' => 'SMSCountry' })
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Calls'   => call_details_list }.to_json)
+
+        status, details_list, _, _ = client.call.get_collection(caller_id: 'SMSCountry')
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of call detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
+        assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('Calls')).with(query: { 'Offset' => '5' })
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Calls'   => call_details_list }.to_json)
+
+        status, details_list, _, _ = client.call.get_collection(offset: 5)
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of call detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
+        assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('Calls')).with(query: { 'Limit' => '5' })
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Calls'   => call_details_list }.to_json)
+
+        status, details_list, _, _ = client.call.get_collection(limit: 5)
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of call detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
+        assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+
+    end
+
+    def test_get_collection_next_values
 
         client = create_mock_client
         refute_nil client, "Client object couldn't be created."
@@ -786,13 +906,14 @@ class CallTest < Minitest::Test
                              'PricePerPulse' => '0.7' }
         call_details_list.push call_detail_hash
 
-        stub_request(:get, mock_uri('Calls')).with(query: { 'FromDate' => '2016-09-15 00:00:00' })
+        stub_request(:get, mock_uri('Calls'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
-                                            'Calls'   => call_details_list }.to_json)
+                                            'Calls'   => call_details_list,
+                                            'Next'    => '/Calls/?Offset=52&Limit=27' }.to_json)
 
-        status, details_list = client.call.get_collection(from: Time.new(2016, 9, 15, 0, 0, 0))
+        status, details_list, next_offset, next_limit = client.call.get_collection
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of call detail objects returned."
@@ -800,16 +921,21 @@ class CallTest < Minitest::Test
         assert_equal 2, details_list.length, "Details list is the wrong length."
         assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
         assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+        refute_nil next_offset, "Next offset wasn't present."
+        assert_equal 52, next_offset, "Next offset value wasn't correct."
+        refute_nil next_limit, "Next limit wasn't present."
+        assert_equal 27, next_limit, "Next limit value wasn't correct."
 
         WebMock.reset!
 
-        stub_request(:get, mock_uri('Calls')).with(query: { 'ToDate' => '2016-09-15 00:00:00' })
+        stub_request(:get, mock_uri('Calls'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
-                                            'Calls'   => call_details_list }.to_json)
+                                            'Calls'   => call_details_list,
+                                            'Next'    => '/Calls/?Limit=27'}.to_json)
 
-        status, details_list = client.call.get_collection(to: Time.new(2016, 9, 15, 0, 0, 0))
+        status, details_list, next_offset, next_limit = client.call.get_collection
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of call detail objects returned."
@@ -817,16 +943,20 @@ class CallTest < Minitest::Test
         assert_equal 2, details_list.length, "Details list is the wrong length."
         assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
         assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+        assert_nil next_offset, "Next offset wasn't nil."
+        refute_nil next_limit, "Next limit wasn't present."
+        assert_equal 27, next_limit, "Next limit value wasn't correct."
 
         WebMock.reset!
 
-        stub_request(:get, mock_uri('Calls')).with(query: { 'CallerId' => 'SMSCountry' })
+        stub_request(:get, mock_uri('Calls'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
-                                            'Calls'   => call_details_list }.to_json)
+                                            'Calls'   => call_details_list,
+                                            'Next'    => '/Calls/?Offset=52'}.to_json)
 
-        status, details_list = client.call.get_collection(caller_id: 'SMSCountry')
+        status, details_list, next_offset, next_limit = client.call.get_collection
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of call detail objects returned."
@@ -834,16 +964,20 @@ class CallTest < Minitest::Test
         assert_equal 2, details_list.length, "Details list is the wrong length."
         assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
         assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+        refute_nil next_offset, "Next offset wasn't present."
+        assert_equal 52, next_offset, "Next offset value wasn't correct."
+        assert_nil next_limit, "Next limit wasn't nil."
 
         WebMock.reset!
 
-        stub_request(:get, mock_uri('Calls')).with(query: { 'Offset' => '5' })
+        stub_request(:get, mock_uri('Calls'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
-                                            'Calls'   => call_details_list }.to_json)
+                                            'Calls'   => call_details_list,
+                                            'Next'    => ''}.to_json)
 
-        status, details_list = client.call.get_collection(offset: 5)
+        status, details_list, next_offset, next_limit = client.call.get_collection
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of call detail objects returned."
@@ -851,16 +985,18 @@ class CallTest < Minitest::Test
         assert_equal 2, details_list.length, "Details list is the wrong length."
         assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
         assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+        assert_nil next_offset, "Next offset wasn't nil."
+        assert_nil next_limit, "Next limit wasn't nil."
 
         WebMock.reset!
 
-        stub_request(:get, mock_uri('Calls')).with(query: { 'Limit' => '5' })
+        stub_request(:get, mock_uri('Calls'))
             .to_return(status: 200, body: { 'Success' => true,
                                             'Message' => "Operation succeeded",
                                             'ApiId'   => API_ID,
                                             'Calls'   => call_details_list }.to_json)
 
-        status, details_list = client.call.get_collection(limit: 5)
+        status, details_list, next_offset, next_limit = client.call.get_collection
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of call detail objects returned."
@@ -868,6 +1004,8 @@ class CallTest < Minitest::Test
         assert_equal 2, details_list.length, "Details list is the wrong length."
         assert_equal "NORMAL", details_list[0].end_reason, "First end reason isn't correct."
         assert_equal "HANGUP", details_list[1].end_reason, "Second end reason isn't correct."
+        assert_nil next_offset, "Next offset wasn't nil."
+        assert_nil next_limit, "Next limit wasn't nil."
 
     end
 
@@ -882,11 +1020,11 @@ class CallTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'Calls'   => nil }.to_json)
 
-        status, detail_list = client.call.get_collection
+        status, details_list, _, _ = client.call.get_collection
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "No list of call details included in response.", status.message, "Unexpected message in status."
-        assert_nil detail_list, "Detail list was not nil."
+        assert_nil details_list, "Detail list was not nil."
 
     end
 
@@ -901,23 +1039,23 @@ class CallTest < Minitest::Test
                                             'ApiId'   => API_ID }.to_json)
 
         assert_raises ArgumentError do
-            status, detail_list = client.call.get_collection(from: '')
+            status, details_list, _, _ = client.call.get_collection(from: '')
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.call.get_collection(to: '')
+            status, details_list, _, _ = client.call.get_collection(to: '')
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.call.get_collection(caller_id: 574)
+            status, details_list, _, _ = client.call.get_collection(caller_id: 574)
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.call.get_collection(offset: '')
+            status, details_list, _, _ = client.call.get_collection(offset: '')
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.call.get_collection(limit: '')
+            status, details_list, _, _ = client.call.get_collection(limit: '')
         end
 
     end
@@ -930,11 +1068,11 @@ class CallTest < Minitest::Test
         stub_request(:get, mock_uri('Calls'))
             .to_raise(StandardError)
 
-        status, detail_list = client.call.get_collection
+        status, details_list, _, _ = client.call.get_collection
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "Exception from WebMock", status.message, "Unexpected error message encountered."
-        assert_nil detail_list, "Returned detail list was not nil."
+        assert_nil details_list, "Returned detail list was not nil."
 
     end
 

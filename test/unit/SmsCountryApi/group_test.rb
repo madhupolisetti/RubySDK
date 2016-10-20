@@ -568,7 +568,7 @@ class GroupTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'Groups'  => group_list }.to_json)
 
-        status, details_list = client.group.get_group_collection
+        status, details_list, _, _ = client.group.get_group_collection
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of group detail objects returned."
@@ -627,7 +627,7 @@ class GroupTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'Groups'  => [g2] }.to_json)
 
-        status, details_list = client.group.get_group_collection(name_like: 'baker')
+        status, details_list, _, _ = client.group.get_group_collection(name_like: 'baker')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of group detail objects returned."
@@ -643,7 +643,7 @@ class GroupTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'Groups'  => [g1] }.to_json)
 
-        status, details_list = client.group.get_group_collection(tiny_name: 'g1')
+        status, details_list, _, _ = client.group.get_group_collection(tiny_name: 'g1')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of group detail objects returned."
@@ -659,7 +659,7 @@ class GroupTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'Groups'  => [g2] }.to_json)
 
-        status, details_list = client.group.get_group_collection(start_call_on_enter: '91XXXXXXXXXZ')
+        status, details_list, _, _ = client.group.get_group_collection(start_call_on_enter: '91XXXXXXXXXZ')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of group detail objects returned."
@@ -675,13 +675,159 @@ class GroupTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'Groups'  => [g1] }.to_json)
 
-        status, details_list = client.group.get_group_collection(end_call_on_exit: '91XXXXXXXXXY')
+        status, details_list, _, _ = client.group.get_group_collection(end_call_on_exit: '91XXXXXXXXXY')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of group detail objects returned."
         assert_kind_of Array, details_list, "Details list isn't an array."
         assert_equal 1, details_list.length, "Details list is the wrong length."
         assert_equal "group 1 able", details_list[0].name, "Returned group name isn't correct."
+
+    end
+
+    def test_get_group_collection_next_values
+
+        client = create_mock_client
+        refute_nil client, "Client object couldn't be created."
+
+        g1         = {
+            'Id'                    => 1,
+            'Name'                  => 'group 1',
+            'TinyName'              => 'sample short name',
+            'StartGroupCallOnEnter' => '91XXXXXXXXXX',
+            'EndGroupCallOnExit'    => '91XXXXXXXXXX',
+            'Members'               => [
+                {
+                    'Id'     => 1567,
+                    'Name'   => 'someone',
+                    'Number' => '91XXXXXXXXXX'
+                },
+                {
+                    'Id'     => 1568,
+                    'Name'   => 'xyzzy',
+                    'Mobile' => '971XXXXXXXX'
+                }
+            ] }
+        g2         = {
+            'Id'                    => 2,
+            'Name'                  => 'group 2',
+            'TinyName'              => 'sample short name',
+            'StartGroupCallOnEnter' => '91XXXXXXXXXX',
+            'EndGroupCallOnExit'    => '91XXXXXXXXXX',
+            'Members'               => [
+                {
+                    'Id'     => 1561,
+                    'Name'   => 'someone',
+                    'Number' => '91XXXXXXXXXX'
+                },
+                {
+                    'Id'     => 1562,
+                    'Name'   => 'xyzzy',
+                    'Mobile' => '971XXXXXXXX'
+                }
+            ] }
+        group_list = [g1, g2]
+
+        stub_request(:get, mock_uri('Groups'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Groups'  => group_list,
+                                            'Next'    => '/Groups/?Offset=52&Limit=27' }.to_json)
+
+        status, details_list, next_offset, next_limit = client.group.get_group_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of group detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "group 1", details_list[0].name, "First group name isn't correct."
+        assert_equal "group 2", details_list[1].name, "Second group name isn't correct."
+        refute_nil next_offset, "Next offset wasn't present."
+        assert_equal 52, next_offset, "Next offset value wasn't correct."
+        refute_nil next_limit, "Next limit wasn't present."
+        assert_equal 27, next_limit, "Next limit value wasn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('Groups'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Groups'  => group_list,
+                                            'Next'    => '/Groups/?Offset=52' }.to_json)
+
+        status, details_list, next_offset, next_limit = client.group.get_group_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of group detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "group 1", details_list[0].name, "First group name isn't correct."
+        assert_equal "group 2", details_list[1].name, "Second group name isn't correct."
+        refute_nil next_offset, "Next offset wasn't present."
+        assert_equal 52, next_offset, "Next offset value wasn't correct."
+        assert_nil next_limit, "Next limit wasn't nil."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('Groups'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Groups'  => group_list,
+                                            'Next'    => '/Groups/?Limit=27' }.to_json)
+
+        status, details_list, next_offset, next_limit = client.group.get_group_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of group detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "group 1", details_list[0].name, "First group name isn't correct."
+        assert_equal "group 2", details_list[1].name, "Second group name isn't correct."
+        assert_nil next_offset, "Next offset wasn't nil."
+        refute_nil next_limit, "Next limit wasn't present."
+        assert_equal 27, next_limit, "Next limit value wasn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('Groups'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Groups'  => group_list,
+                                            'Next'    => '' }.to_json)
+
+        status, details_list, next_offset, next_limit = client.group.get_group_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of group detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "group 1", details_list[0].name, "First group name isn't correct."
+        assert_equal "group 2", details_list[1].name, "Second group name isn't correct."
+        assert_nil next_offset, "Next offset wasn't nil."
+        assert_nil next_limit, "Next limit wasn't nil."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('Groups'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'Groups'  => group_list }.to_json)
+
+        status, details_list, next_offset, next_limit = client.group.get_group_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of group detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "group 1", details_list[0].name, "First group name isn't correct."
+        assert_equal "group 2", details_list[1].name, "Second group name isn't correct."
+        assert_nil next_offset, "Next offset wasn't nil."
+        assert_nil next_limit, "Next limit wasn't nil."
 
     end
 
@@ -696,7 +842,7 @@ class GroupTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'Groups'  => nil }.to_json)
 
-        status, details_list = client.group.get_group_collection
+        status, details_list, _, _ = client.group.get_group_collection
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "No list of group details included in response.", status.message, "Unexpected message in status."
@@ -715,27 +861,27 @@ class GroupTest < Minitest::Test
                                             'ApiId'   => API_ID }.to_json)
 
         assert_raises ArgumentError do
-            status, detail_list = client.group.get_group_collection(name_like: 754)
+            status, details_list, _, _ = client.group.get_group_collection(name_like: 754)
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.group.get_group_collection(tiny_name: 754)
+            status, details_list, _, _ = client.group.get_group_collection(tiny_name: 754)
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.group.get_group_collection(start_call_on_enter: 574)
+            status, details_list, _, _ = client.group.get_group_collection(start_call_on_enter: 574)
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.group.get_group_collection(end_call_on_exit: 574)
+            status, details_list, _, _ = client.group.get_group_collection(end_call_on_exit: 574)
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.group.get_group_collection(offset: '')
+            status, details_list, _, _ = client.group.get_group_collection(offset: '')
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.group.get_group_collection(limit: '')
+            status, details_list, _, _ = client.group.get_group_collection(limit: '')
         end
 
     end
@@ -748,7 +894,7 @@ class GroupTest < Minitest::Test
         stub_request(:get, mock_uri('Groups'))
             .to_raise(StandardError)
 
-        status, group_collection = client.group.get_group_collection
+        status, group_collection, _, _ = client.group.get_group_collection
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "Exception from WebMock", status.message, "Unexpected error message encountered."

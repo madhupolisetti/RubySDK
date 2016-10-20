@@ -527,7 +527,7 @@ class SMSTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'SMSes'   => message_details_list }.to_json)
 
-        status, details_list = client.sms.get_collection
+        status, details_list, _, _ = client.sms.get_collection
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of message detail objects returned."
@@ -569,7 +569,7 @@ class SMSTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'SMSes'   => message_details_list }.to_json)
 
-        status, details_list = client.sms.get_collection(from: Time.new(2016, 9, 15, 0, 0, 0))
+        status, details_list, _, _ = client.sms.get_collection(from: Time.new(2016, 9, 15, 0, 0, 0))
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of message detail objects returned."
@@ -586,7 +586,7 @@ class SMSTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'SMSes'   => message_details_list }.to_json)
 
-        status, details_list = client.sms.get_collection(to: Time.new(2016, 9, 15, 0, 0, 0))
+        status, details_list, _, _ = client.sms.get_collection(to: Time.new(2016, 9, 15, 0, 0, 0))
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of message detail objects returned."
@@ -603,7 +603,7 @@ class SMSTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'SMSes'   => message_details_list }.to_json)
 
-        status, details_list = client.sms.get_collection(sender_id: 'SMSCountry')
+        status, details_list, _, _ = client.sms.get_collection(sender_id: 'SMSCountry')
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of message detail objects returned."
@@ -620,7 +620,7 @@ class SMSTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'SMSes'   => message_details_list }.to_json)
 
-        status, details_list = client.sms.get_collection(offset: 5)
+        status, details_list, _, _ = client.sms.get_collection(offset: 5)
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of message detail objects returned."
@@ -637,7 +637,7 @@ class SMSTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'SMSes'   => message_details_list }.to_json)
 
-        status, details_list = client.sms.get_collection(limit: 5)
+        status, details_list, _, _ = client.sms.get_collection(limit: 5)
         refute_nil status, "No status object returned."
         assert status.success, "Status did not indicate success: " + status.message
         refute_nil details_list, "No list of message detail objects returned."
@@ -645,6 +645,134 @@ class SMSTest < Minitest::Test
         assert_equal 2, details_list.length, "Details list is the wrong length."
         assert_equal "First message", details_list[0].text, "First message text isn't correct."
         assert_equal "Second message", details_list[1].text, "Second message text isn't correct."
+
+    end
+
+    def test_get_collection_next_values
+
+        client = create_mock_client
+        refute_nil client, "Client object couldn't be created."
+
+        message_details_list = []
+        message_detail_hash  = { 'MessageUUID' => UUID,
+                                 'Number'      => PHONE_NUMBERS[0],
+                                 'Tool'        => 'api',
+                                 'SenderId'    => 'SMSCountry',
+                                 'Text'        => "First message",
+                                 'Status'      => 'received',
+                                 'StatusTime'  => Time.now.to_i.to_s,
+                                 'Cost'        => "1.25 USD" }
+        message_details_list.push message_detail_hash
+        message_detail_hash = { 'MessageUUID' => UUID,
+                                'Number'      => PHONE_NUMBERS[0],
+                                'Tool'        => 'api',
+                                'SenderId'    => 'SMSCountry',
+                                'Text'        => "Second message",
+                                'Status'      => 'received',
+                                'StatusTime'  => Time.now.to_i.to_s,
+                                'Cost'        => "1.25 USD" }
+        message_details_list.push message_detail_hash
+
+        stub_request(:get, mock_uri('SMSes'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'SMSes'   => message_details_list,
+                                            'Next'    => '/SMSes/?Offset=52&Limit=27' }.to_json)
+
+        status, details_list, next_offset, next_limit = client.sms.get_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of message detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "First message", details_list[0].text, "First message text isn't correct."
+        assert_equal "Second message", details_list[1].text, "Second message text isn't correct."
+        refute_nil next_offset, "Next offset wasn't present."
+        assert_equal 52, next_offset, "Next offset value wasn't correct."
+        refute_nil next_limit, "Next limit wasn't present."
+        assert_equal 27, next_limit, "Next limit value wasn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('SMSes'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'SMSes'   => message_details_list,
+                                            'Next'    => '/SMSes/?Limit=27' }.to_json)
+
+        status, details_list, next_offset, next_limit = client.sms.get_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of message detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "First message", details_list[0].text, "First message text isn't correct."
+        assert_equal "Second message", details_list[1].text, "Second message text isn't correct."
+        assert_nil next_offset, "Next offset wasn't nil."
+        refute_nil next_limit, "Next limit wasn't present."
+        assert_equal 27, next_limit, "Next limit value wasn't correct."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('SMSes'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'SMSes'   => message_details_list,
+                                            'Next'    => '/SMSes/?Offset=52' }.to_json)
+
+        status, details_list, next_offset, next_limit = client.sms.get_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of message detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "First message", details_list[0].text, "First message text isn't correct."
+        assert_equal "Second message", details_list[1].text, "Second message text isn't correct."
+        refute_nil next_offset, "Next offset wasn't present."
+        assert_equal 52, next_offset, "Next offset value wasn't correct."
+        assert_nil next_limit, "Next limit wasn't nil."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('SMSes'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'SMSes'   => message_details_list,
+                                            'Next'    => '' }.to_json)
+
+        status, details_list, next_offset, next_limit = client.sms.get_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of message detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "First message", details_list[0].text, "First message text isn't correct."
+        assert_equal "Second message", details_list[1].text, "Second message text isn't correct."
+        assert_nil next_offset, "Next offset wasn't nil."
+        assert_nil next_limit, "Next limit wasn't nil."
+
+        WebMock.reset!
+
+        stub_request(:get, mock_uri('SMSes'))
+            .to_return(status: 200, body: { 'Success' => true,
+                                            'Message' => "Operation succeeded",
+                                            'ApiId'   => API_ID,
+                                            'SMSes'   => message_details_list }.to_json)
+
+        status, details_list, next_offset, next_limit = client.sms.get_collection
+        refute_nil status, "No status object returned."
+        assert status.success, "Status did not indicate success: " + status.message
+        refute_nil details_list, "No list of message detail objects returned."
+        assert_kind_of Array, details_list, "Details list isn't an array."
+        assert_equal 2, details_list.length, "Details list is the wrong length."
+        assert_equal "First message", details_list[0].text, "First message text isn't correct."
+        assert_equal "Second message", details_list[1].text, "Second message text isn't correct."
+        assert_nil next_offset, "Next offset wasn't nil."
+        assert_nil next_limit, "Next limit wasn't nil."
 
     end
 
@@ -659,11 +787,11 @@ class SMSTest < Minitest::Test
                                             'ApiId'   => API_ID,
                                             'SMSes'   => nil }.to_json)
 
-        status, detail_list = client.sms.get_collection
+        status, details_list, _, _ = client.sms.get_collection
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "No list of message details included in response.", status.message, "Unexpected message in status."
-        assert_nil detail_list, "Detail list was not nil."
+        assert_nil details_list, "Detail list was not nil."
 
     end
 
@@ -678,23 +806,23 @@ class SMSTest < Minitest::Test
                                             'ApiId'   => API_ID }.to_json)
 
         assert_raises ArgumentError do
-            status, detail_list = client.sms.get_collection(from: '')
+            status, details_list, _, _ = client.sms.get_collection(from: '')
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.sms.get_collection(to: '')
+            status, details_list, _, _ = client.sms.get_collection(to: '')
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.sms.get_collection(sender_id: 574)
+            status, details_list, _, _ = client.sms.get_collection(sender_id: 574)
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.sms.get_collection(offset: '')
+            status, details_list, _, _ = client.sms.get_collection(offset: '')
         end
 
         assert_raises ArgumentError do
-            status, detail_list = client.sms.get_collection(limit: '')
+            status, details_list, _, _ = client.sms.get_collection(limit: '')
         end
 
     end
@@ -707,11 +835,11 @@ class SMSTest < Minitest::Test
         stub_request(:get, mock_uri('SMSes'))
             .to_raise(StandardError)
 
-        status, detail_list = client.sms.get_collection
+        status, details_list, _, _ = client.sms.get_collection
         refute_nil status, "No status object returned."
         refute status.success, "Status did not indicate failure: " + status.message
         assert_equal "Exception from WebMock", status.message, "Unexpected error message encountered."
-        assert_nil detail_list, "Returned detail list was not nil."
+        assert_nil details_list, "Returned detail list was not nil."
 
     end
 

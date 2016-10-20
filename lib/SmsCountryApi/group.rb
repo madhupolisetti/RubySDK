@@ -6,6 +6,7 @@
 #-----
 
 require 'rest-client'
+require 'addressable'
 
 module SmsCountryApi
 
@@ -358,9 +359,13 @@ module SmsCountryApi
         # @param [String] start_call_on_enter Find all groups with this `start_call_on_enter` number.
         # @param [String] end_call_on_exit Find all groups with this `end_call_on_edit` number.
         #
-        # @return [Array({StatusResponse}, Array<{GroupDetail}>)]
+        # @return [Array({StatusResponse}, Array<{GroupDetail}>, Integer, Integer)]
         #   - Status of the operation.
         #   - Array of {GroupDetail} objects with the details of the groups.
+        #   - Offset value for next group of details if there are more matched than were returned,
+        #     nil if not present in the response.
+        #   - Limit value for the next group of details if there are more matched than were returned,
+        #     nil if not present in the response.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
@@ -384,6 +389,8 @@ module SmsCountryApi
             end
             headers = @endpoint.headers
 
+            next_offset = nil
+            next_limit = nil
             returned_detail_list = nil
             begin
                 response = RestClient.get url, headers
@@ -399,13 +406,26 @@ module SmsCountryApi
                     else
                         status = StatusResponse.new(false, "No list of group details included in response.")
                     end
+                    next_string = result['Next']
+                    unless next_string.nil? || next_string.empty?
+                        a = Addressable::URI.parse(next_string)
+                        h = a.query_values
+                        s = h['Offset']
+                        unless s.nil? || s.empty?
+                            next_offset = s.to_i
+                        end
+                        s = h['Limit']
+                        unless s.nil? || s.empty?
+                            next_limit = s.to_i
+                        end
+                    end
                 else
                     status = StatusResponse.new(false, "No response received.")
                 end
             rescue StandardError => e
                 status = StatusResponse.new(false, e.to_s)
             end
-            return status, returned_detail_list
+            return status, returned_detail_list, next_offset, next_limit
         end
 
         # Update a specific group with the new details given. Details that are not given remain unchanged.

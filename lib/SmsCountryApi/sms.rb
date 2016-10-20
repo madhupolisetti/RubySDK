@@ -6,6 +6,7 @@
 #-----
 
 require 'rest-client'
+require 'addressable'
 
 module SmsCountryApi
 
@@ -326,10 +327,13 @@ module SmsCountryApi
         # @param [Integer] offset Position to start returning messages from. (default: 0)
         # @param [Integer] limit Maximum number of messages to return in one call. (default: 10)
         #
-        # @return [Array({StatusResponse}, {SmsDetails})]
+        # @return [Array({StatusResponse}, {SmsDetails}, Integer, Integer)]
         #   - Status of the operation.
         #   - Array of detail objects of the SMS messages matching the criteria.
-        #   - TODO Next offset/limit returned from server?
+        #   - Offset value for next group of details if there are more matched than were returned,
+        #     nil if not present in the response.
+        #   - Limit value for the next group of details if there are more matched than were returned,
+        #     nil if not present in the response.
         #
         # @raise [ArgumentError] An argument is invalid.
         #
@@ -363,6 +367,8 @@ module SmsCountryApi
             end
             headers = @endpoint.headers
 
+            next_offset = nil
+            next_limit = nil
             returned_detail_list = nil
             begin
                 response = RestClient.get url, headers
@@ -378,13 +384,26 @@ module SmsCountryApi
                     else
                         status = StatusResponse.new(false, "No list of message details included in response.")
                     end
+                    next_string = result['Next']
+                    unless next_string.nil? || next_string.empty?
+                        a = Addressable::URI.parse(next_string)
+                        h = a.query_values
+                        s = h['Offset']
+                        unless s.nil? || s.empty?
+                            next_offset = s.to_i
+                        end
+                        s = h['Limit']
+                        unless s.nil? || s.empty?
+                            next_limit = s.to_i
+                        end
+                    end
                 else
                     status = StatusResponse.new(false, "No response received.")
                 end
             rescue StandardError => e
                 status = StatusResponse.new(false, e.to_s)
             end
-            return status, returned_detail_list
+            return status, returned_detail_list, next_offset, next_limit
         end
 
     end
